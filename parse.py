@@ -74,11 +74,11 @@ def collect_individual_metadata(individuals, clean_tags):
             if skip_tag == 1:
                 break
 
-    name, gender, birth_date, death_date = "", "", "", ""
-    alive = False
     for key, value in individuals.items():
+        name, gender, birth_date, death_date = "", "", "", "-"
+        alive = False
         for i in range(len(value)):
-            family_child, family_spouse = "", ""
+            family_child, family_spouse = "-", "-"
             tag = value[i][0]
             if tag == 'NAME':
                 name = value[i][1]
@@ -137,7 +137,7 @@ def collect_family_metadata(individuals, families, clean_tags):
 
     for key, value in families.items():
         children = []
-        married_date, divorce_date = "", ""
+        married_date, divorce_date = "", "-"
         husband_id, wife_id = "", ""
         husband_name, wife_name = "", ""
 
