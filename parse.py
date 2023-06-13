@@ -2,16 +2,21 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from prettytable import PrettyTable
 
-x = PrettyTable()
-y = PrettyTable()
-
-supported_tags = {'INDI': '0', 'NAME': '1', 'SEX': '1', 'BIRT': '1', 'DEAT': '1', 'FAMC': '1', 'FAMS': '1', 'FAM': '0',
-              'MARR': '1', 'HUSB': '1', 'WIFE': '1', 'CHIL': '1', 'DIV': '1', 'DATE': '2', 'HEAD': '0',
-              'TRLR': '0', 'NOTE': '0'}
+def get_individual_data_by_key(individuals, id, key):
+    # Example Individual data: key(NAME, SEX, DATE, DEAT, FAMS, FAMC)
+    # {
+    #     'I2': [
+    #         ('NAME', 'Elena /Golecha/'), ('SEX', 'F'), ('DATE', '1 JAN 1976'),
+    #         ('DEAT', '1 JAN 2012'), ('FAMS', 'F1'), ('FAMC', 'F2')
+    #     ],
+    # }
+    meta_data = None
+    for meta in individuals[id]:
+        if meta[0] == key: meta_data = meta[1]
+    return meta_data
 
 def is_not_supported_tags(level, tag):
     return (level == 1 and tag == 'DATE') or (level == 2 and tag == 'NAME')
-
 
 def clean_gedcom_tags(file_path, supported_tags):
     clean_tags = []
@@ -47,6 +52,7 @@ def clean_gedcom_tags(file_path, supported_tags):
     return clean_tags
 
 def collect_individual_metadata(individuals, clean_tags):
+    x = PrettyTable()
     x.field_names = ['ID', 'Name', 'Gender', 'Birthday', 'Age', 'Alive', 'Death', 'Child', 'Spouse']
 
     for i, tag in enumerate(clean_tags):
@@ -76,7 +82,7 @@ def collect_individual_metadata(individuals, clean_tags):
 
     for key, value in individuals.items():
         name, gender, birth_date, death_date = "", "", "", "-"
-        alive = False
+        alive = True
         for i in range(len(value)):
             family_child, family_spouse = "-", "-"
             tag = value[i][0]
@@ -94,8 +100,9 @@ def collect_individual_metadata(individuals, clean_tags):
                 family_child = value[i][1]
             if tag == 'FAMS':
                 family_spouse = value[i][1]
+
         if any('DEAT' in i for i in value):
-            alive = True
+            alive = False
             age = relativedelta(death_date, birth_date).years
         else:
             age = relativedelta(datetime.datetime.now(), birth_date).years
@@ -155,15 +162,44 @@ def collect_family_metadata(individuals, families, clean_tags):
             elif tag == 'DIV':
                 divorce_date = datetime.datetime.strptime(data, '%d %b %Y').date()
 
+        check_if_married_before_divorce(married_date, divorce_date)
+        check_if_married_before_death(married_date, get_individual_data_by_key(individuals, husband_id, 'DEAT'))
+        check_if_married_before_death(married_date, get_individual_data_by_key(individuals, wife_id, 'DEAT'))
+
         y.add_row([key, married_date, divorce_date, husband_id, husband_name, wife_id, wife_name, children])
 
     print("Families")
     print(y)
     y.clear_rows()
 
+# Story Id - US03:
+def check_if_married_before_divorce(marriage_date, divorce_date):
+    # Marriage before Divorce
+    if (marriage_date == '-') or (divorce_date == '-'): return
+
+    if marriage_date and divorce_date:
+        if divorce_date > marriage_date:
+            raise Exception('Marriage date cannot be after divorce date')
+
+# Story Id - US04:
+def check_if_married_before_death(marriage_date, death_date):
+    # Marriage before Death
+    if (marriage_date == '-') or (death_date == '-'): return
+
+    if marriage_date and death_date:
+        death_date_formatted = datetime.datetime.strptime(death_date, '%d %b %Y').date()
+        if death_date_formatted < marriage_date:
+            raise Exception('Marriage date cannot be after death date')
+
 def parse_gedcom_file():
     individuals = {}
     families = {}
+    supported_tags = {
+        'INDI': '0', 'NAME': '1', 'SEX': '1', 'BIRT': '1', 'DEAT': '1', 'FAMC': '1', 'FAMS': '1',
+        'FAM': '0',
+        'MARR': '1', 'HUSB': '1', 'WIFE': '1', 'CHIL': '1', 'DIV': '1', 'DATE': '2', 'HEAD': '0',
+        'TRLR': '0', 'NOTE': '0'
+    }
     clean_tags = clean_gedcom_tags('sample.ged', supported_tags)
     collect_individual_metadata(individuals, clean_tags)
     collect_family_metadata(individuals, families, clean_tags)
