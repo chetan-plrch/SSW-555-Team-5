@@ -191,6 +191,103 @@ def check_if_married_before_death(marriage_date, death_date):
         if death_date_formatted < marriage_date:
             raise Exception('Marriage date cannot be after death date')
 
+# Story Id - US06
+def divorce_before_death(families, individuals):
+    count = 0
+    for id in families:
+        if "DIV" in families[id]:
+            div_date = datetime.strptime(families[id]["DIV"], "%d %b %Y")
+            print(div_date)
+            husb_ID = families[id]["HUSB"]
+            wife_ID = families[id]["WIFE"]
+            if "DEAT" in individuals[husb_ID] and "DEAT" in individuals[wife_ID]:
+                husbDeath = datetime.strptime(
+                    individuals[husb_ID]["DEATH_DATE"], "%d %b %Y"
+                )
+                wifeDeath = datetime.strptime(
+                    individuals[wife_ID]["DEATH_DATE"], "%d %b %Y"
+                )
+                if div_date > husbDeath and div_date > wifeDeath:
+                    count += 1
+                    print(
+                        "ERROR: FAMILY: US06: Divorce between "
+                        + "'"
+                        + get_individual_name(husb_ID, individuals).replace("/", "")
+                        + "' and '"
+                        + get_individual_name(wife_ID, individuals).replace("/", "")
+                        + "' cannot occur after both partners' deaths."
+                    )
+            elif "DEAT" in individuals[husb_ID]:
+                husbDeath = datetime.strptime(
+                    individuals[husb_ID]["DEATH_DATE"], "%d %b %Y"
+                )
+                if div_date > husbDeath:
+                    count += 1
+                    print(
+                        "ERROR: FAMILY: US06: Divorce between "
+                        + "'"
+                        + get_individual_name(husb_ID, individuals).replace("/", "")
+                        + "' and '"
+                        + get_individual_name(wife_ID, individuals).replace("/", "")
+                        + "' cannot occur after "
+                        + get_individual_name(husb_ID, individuals).replace("/", "")
+                        + "'s death."
+                    )
+                elif "DEAT" in individuals[wife_ID]:
+                    wifeDeath = datetime.strptime(
+                        individuals[wife_ID]["DEATH_DATE"], "%d %b %Y")
+                if div_date > wifeDeath:
+                    count += 1
+                    print(
+                        "ERROR: FAMILY: US06: Divorce between "
+                        + "'"
+                        + get_individual_name(husb_ID, individuals).replace("/", "")
+                        + "' and '"
+                        + get_individual_name(wife_ID, individuals).replace("/", "")
+                        + "' cannot occur after "
+                        + get_individual_name(wife_ID, individuals).replace("/", "")
+                        + "'s death."
+                    )
+    if count == 0:
+        return True
+    else:
+        return False
+#print("US06: Divorce before Death" + str(divorce_before_death(y,x)))
+
+# Story Id - US08
+def check_birth_after_parent_marriage(families, individuals):
+    is_valid = True
+    for id in families:
+        if "MARR" in families[id]:
+            # Check for edge case of MARR not containing date
+            if "DATE" in families[id]:
+                marriageDate = datetime.strptime(
+                    families[id]["DATE"], "%d %b %Y"
+                ).date()
+                for childID in families[id]["CHIL"]:
+                    childBirthDate = datetime.strptime(
+                        individuals[childID]["DATE"], "%d %b %Y"
+                    ).date()
+                    if childBirthDate < marriageDate:
+                        print(
+                            "FAMILY: US08: Child ("
+                            + get_individual_name(childID, individuals).replace("/", "")
+                            + ") born before marriage of parents in family: "
+                            + id
+                            + "."
+                        )
+                        is_valid = False
+            else:
+                print(
+                    "ERROR: FILE: US08: Marriage date not set or properly formatted, Check "
+                    + id
+                    + "."
+                )
+                is_valid = False
+    return is_valid
+
+#print("US08: Birth After Parents Marriage:" + str(check_birth_after_parent_marriage(y,x)))
+
 def parse_gedcom_file():
     individuals = {}
     families = {}
