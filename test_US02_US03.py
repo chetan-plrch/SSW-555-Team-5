@@ -4,144 +4,51 @@ import datetime
 
 class MyTestCase(unittest.TestCase):
     def test_US02_1(self):
-        indi_data, fam_data = parse.parse_gedcom_file('tests/US02_test1.ged')
-        final_dict = {}
-
-        for id in indi_data.keys():
-            final_dict[id] = []
-
-        for id, value in indi_data.items():
-            birth_date = parse.get_individual_data_by_key(indi_data, id, 'DATE')
-            final_dict[id].append(birth_date)
-            
-        for key, value in fam_data.items():
-            for dictId in final_dict.keys():
-                if value[0][1] == dictId or value[1][1] == dictId:
-                    marriage_date = parse.get_family_data_by_key(fam_data, key, 'MARR')
-                    marriage_date_formatted = datetime.datetime.strptime(marriage_date, '%d %b %Y').date()
-                    final_dict[dictId].append(marriage_date_formatted)
-            
-        try:
-            for key, value in final_dict.items():
-                if len(value) == 2:
-                    self.assertEqual(parse.check_if_birth_before_marriage(value[0], value[1]), 'Birth date cannot be after marriage date')
-                elif len(value) == 3:
-                    self.assertEqual(parse.check_if_birth_before_marriage(value[0], value[1]), 'Birth date cannot be after marriage date')
-                    self.assertEqual(parse.check_if_birth_before_marriage(value[0], value[2]), 'Birth date cannot be after marriage date')
-        except Exception as e:
-            print(e)
+        self.assertIsNone(parse.check_if_birth_before_marriage('-', '-'))
+        print('US02 Test Case 1 Passed: Birth date and marriage date are not present')
 
     def test_US02_2(self):
-        indi_data, fam_data = parse.parse_gedcom_file('tests/US02_test2.ged')
-        final_dict = {}
+        self.assertEqual(parse.check_if_birth_before_marriage('-', '1997-09-12'), 'Birth Date needs to be present if marriage date is present')
+        print('US02 Test Case 2 Passed: Birth date is not present and marriage date is present')
 
-        for id in indi_data.keys():
-            final_dict[id] = []
-
-        for id, value in indi_data.items():
-            birth_date = parse.get_individual_data_by_key(indi_data, id, 'DATE')
-            final_dict[id].append(birth_date)
-            
-        for key, value in fam_data.items():
-            for dictId in final_dict.keys():
-                if value[0][1] == dictId or value[1][1] == dictId:
-                    marriage_date = parse.get_family_data_by_key(fam_data, key, 'MARR')
-                    marriage_date_formatted = datetime.datetime.strptime(marriage_date, '%d %b %Y').date()
-                    final_dict[dictId].append(marriage_date_formatted)
-        
-        try:
-            for key, value in final_dict.items():
-                if len(value) == 2:
-                    self.assertEqual(parse.check_if_birth_before_marriage(value[0], value[1]), 'Birth date cannot be after marriage date')
-                elif len(value) == 3:
-                    self.assertEqual(parse.check_if_birth_before_marriage(value[0], value[1]), 'Birth date cannot be after marriage date')
-                    self.assertEqual(parse.check_if_birth_before_marriage(value[0], value[2]), 'Birth date cannot be after marriage date')
-        except Exception as e:
-            print(e)
-    
     def test_US02_3(self):
-        indi_data, fam_data = parse.parse_gedcom_file('tests/US02_test3.ged')
-        final_dict = {}
-
-        for id in indi_data.keys():
-            final_dict[id] = []
-
-        for id, value in indi_data.items():
-            birth_date = parse.get_individual_data_by_key(indi_data, id, 'DATE')
-            final_dict[id].append(birth_date)
-            
-        for key, value in fam_data.items():
-            for dictId in final_dict.keys():
-                if value[0][1] == dictId or value[1][1] == dictId:
-                    marriage_date = parse.get_family_data_by_key(fam_data, key, 'MARR')
-                    marriage_date_formatted = datetime.datetime.strptime(marriage_date, '%d %b %Y').date()
-                    final_dict[dictId].append(marriage_date_formatted)
-        
-        try:
-            for key, value in final_dict.items():
-                if len(value) == 2:
-                    self.assertEqual(parse.check_if_birth_before_marriage(value[0], value[1]), 'Birth date cannot be after marriage date') 
-                elif len(value) == 3:
-                    self.assertEqual(parse.check_if_birth_before_marriage(value[0], value[1]), 'Birth date cannot be after marriage date')
-                    self.assertEqual(parse.check_if_birth_before_marriage(value[0], value[2]), 'Birth date cannot be after marriage date')
-        except Exception as e:
-            print(e)
+        self.assertIsNone(parse.check_if_birth_before_marriage('2005-08-08', '-'))
+        print('US02 Test Case 3 Passed: Birth date is present and marriage date is not present')
 
     def test_US02_4(self):
-        indi_data, fam_data = parse.parse_gedcom_file('tests/US02_test4.ged')
-        final_dict = {}
-
-        for id in indi_data.keys():
-            final_dict[id] = []
-
-        for id, value in indi_data.items():
-            birth_date = parse.get_individual_data_by_key(indi_data, id, 'DATE')
-            final_dict[id].append(birth_date)
-            
-        for key, value in fam_data.items():
-            for dictId in final_dict.keys():
-                if value[0][1] == dictId or value[1][1] == dictId:
-                    marriage_date = parse.get_family_data_by_key(fam_data, key, 'MARR')
-                    marriage_date_formatted = datetime.datetime.strptime(marriage_date, '%d %b %Y').date()
-                    final_dict[dictId].append(marriage_date_formatted)
-        
-        try:
-            for key, value in final_dict.items():
-                if len(value) == 2:
-                    self.assertEqual(parse.check_if_birth_before_marriage(value[0], value[1]), 'Birth date cannot be after marriage date') 
-                elif len(value) == 3:
-                    self.assertEqual(parse.check_if_birth_before_marriage(value[0], value[1]), 'Birth date cannot be after marriage date')
-                    self.assertEqual(parse.check_if_birth_before_marriage(value[0], value[2]), 'Birth date cannot be after marriage date')
-        except Exception as e:
-            print(e)
+        self.assertEqual(parse.check_if_birth_before_marriage('1998-07-11', '1992-09-11'), 'Birth date cannot be after marriage date')
+        print('US02 Test Case 4 Passed: Birth date should not be after marriage date')
 
     def test_US02_5(self):
-        indi_data, fam_data = parse.parse_gedcom_file('tests/US02_test5.ged')
-        final_dict = {}
+        self.assertEqual(parse.check_if_birth_before_marriage('2005-09-01', '2005-09-01'), 'Birth date cannot be same as marriage date')
+        print('US02 Test Case 5 Passed: Birth date should not be same as marriage date')
 
-        for id in indi_data.keys():
-            final_dict[id] = []
 
-        for id, value in indi_data.items():
-            birth_date = parse.get_individual_data_by_key(indi_data, id, 'DATE')
-            final_dict[id].append(birth_date)
-            
-        for key, value in fam_data.items():
-            for dictId in final_dict.keys():
-                if value[0][1] == dictId or value[1][1] == dictId:
-                    marriage_date = parse.get_family_data_by_key(fam_data, key, 'MARR')
-                    marriage_date_formatted = datetime.datetime.strptime(marriage_date, '%d %b %Y').date()
-                    final_dict[dictId].append(marriage_date_formatted)
-        
-        try:
-            for key, value in final_dict.items():
-                if len(value) == 2:
-                    self.assertEqual(parse.check_if_birth_before_marriage(value[0], value[1]), 'Birth date cannot be after marriage date') 
-                elif len(value) == 3:
-                    self.assertEqual(parse.check_if_birth_before_marriage(value[0], value[1]), 'Birth date cannot be after marriage date')
-                    self.assertEqual(parse.check_if_birth_before_marriage(value[0], value[2]), 'Birth date cannot be after marriage date')
-        except Exception as e:
-            print(e)  
+    def test_US03_1(self):
+        self.assertIsNone(parse.check_if_birth_before_death('-', '-'))
+        print('US03 Test Case 1 Passed: Birth date and death date are not present')
+
+    def test_US03_2(self):
+        self.assertIsNone(parse.check_if_birth_before_death(datetime.datetime.strptime('1998-29-06', '%Y-%d-%m').date(), '-'))
+        print('US03 Test Case 2 Passed: Birth date is present and death date is not present')
+
+    def test_US03_3(self):
+        self.assertEqual(parse.check_if_birth_before_death('-', '01 FEB 1995'), 'Birth Date needs to be present if death date is present')
+        print('US03 Test Case 3 Passed: Birth date is not present and death date is present')
+
+    def test_US03_4(self):
+        self.assertEqual(parse.check_if_birth_before_death(datetime.datetime.strptime('1998-15-08', '%Y-%d-%m').date(), '01 JAN 1995'),
+                         'Birth date cannot be after death date')
+        print('US03 Test Case 4 Passed: Birth date cannot be after death date')
+
+    def test_US03_5(self):
+        self.assertEqual(parse.check_if_birth_before_death(datetime.datetime.strptime('1999-14-11', '%Y-%d-%m').date(), '14 NOV 1999'),
+                         'Birth date cannot be same as death date')
+        print('US04 Test Case 5 Passed: Birth date cannot be same as death date')
+
+    def test_US03_6(self):
+        self.assertIsNone(parse.check_if_birth_before_death(datetime.datetime.strptime('1995-01-12', '%Y-%d-%m').date(), '12 FEB 2012'))
+        print('US04 Test Case 6 Passed: Birth date is before death date')        
         
 if __name__ == '__main__':
     unittest.main()
