@@ -206,21 +206,43 @@ def check_if_birth_before_death(birth_date, death_date):
 # Story Id - US04:
 def check_if_married_before_divorce(marriage_date, divorce_date):
     # Marriage before Divorce
-    if (marriage_date == '-') or (divorce_date == '-'): return
+    if (marriage_date == '-') and (divorce_date == '-'): return None
+    if (marriage_date != '-') and (divorce_date == '-'): return None
+
+    if (marriage_date == '-') and (divorce_date != '-'):
+        err = "ERROR: US04: Marriage date needs to be present if divorce date is present"
+        print(err)
+        return err
 
     if marriage_date and divorce_date:
         if marriage_date > divorce_date:
-            raise Exception('Marriage date cannot be after divorce date')
+            err = "ERROR: US04: Marriage date cannot be after divorce date"
+            print(err)
+            return err
+
+        if marriage_date == divorce_date:
+            err = "ERROR: US04: Marriage date cannot be equal to divorce date"
+            print(err)
+            return err
 
 # Story Id - US05:
 def check_if_married_before_death(marriage_date, death_date):
     # Marriage before Death
-    if (marriage_date == '-') or (death_date == '-'): return
+    if (marriage_date == '-') or (death_date == '-'): return None
+    if (marriage_date != '-') and (death_date == '-'): return None
 
     if marriage_date and death_date:
         death_date_formatted = datetime.datetime.strptime(death_date, '%d %b %Y').date()
-        if death_date_formatted < marriage_date:
-            raise Exception('Marriage date cannot be after death date')
+        if marriage_date > death_date_formatted:
+            err = "ERROR: US04: Marriage date cannot be after death date"
+            print(err)
+            return err
+
+        if marriage_date == death_date_formatted:
+            err = "ERROR: US04: Marriage date cannot be equal to death date"
+            print(err)
+            return err
+
 
 # Story Id - US06
 def divorce_before_death(families, individuals):
