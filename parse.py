@@ -16,10 +16,21 @@ def get_individual_data_by_key(individuals, id, key):
     return meta_data
 
 def get_family_data_by_key(families, id, key):
-    meta_data = None
-    for meta in families[id]:
-        if meta[0] == key: meta_data = meta[1]
-    return meta_data
+    #print(families)
+    #return families[id][key]
+    #if key not in families[id][0]:
+    #    return False
+    #return families[id][0][key]
+    #meta_data = None
+    #for meta in families[id]:
+    #    if meta[0] == key: meta_data = meta[1]
+    #return meta_data
+    family_data_list = families[id]
+    for tuple in family_data_list:
+        if tuple[0] == key:
+            return tuple[1]
+    #if execution reaches here key was not found
+    return false
 
 def is_not_supported_tags(level, tag):
     return (level == 1 and tag == 'DATE') or (level == 2 and tag == 'NAME')
@@ -345,17 +356,17 @@ def check_birth_after_parent_marriage(families, individuals):
         #if "MARR" in families[id]:
         if get_family_data_by_key(families,id,"MARR"):
             marriageDate = datetime.datetime.strptime(get_family_data_by_key(families,id,"MARR"), "%d %b %Y").date()
-            for childID in get_family_data_by_key(families,id,"CHIL"):
-                childBirthDate = datetime.datetime.strptime(get_family_data_by_key(families,id,"MARR"), "%d %b %Y").date()
+            childID = get_family_data_by_key(families,id,"CHIL")
+            if childID:
+                childBirthDate = datetime.datetime.strptime(get_individual_data_by_key(individuals,childID,"DATE"), "%d %b %Y").date()
                 if childBirthDate < marriageDate:
                     print("ANOMALY: FAMILY: US08: Child ("
-                            + get_individual_name(childID, individuals).replace("/", "")
+                            + childID
                             + ") born before marriage of parents in family: "
                             + id
                             + ".")
                     is_valid = False
         else:
-            print(families[id])
             print("ERROR: FILE: US08: Marriage date not set or properly formatted of family: "
                 + id
                 + ".")
@@ -377,4 +388,5 @@ def parse_gedcom_file(file_name):
     collect_family_metadata(individuals, families, clean_tags)
     return individuals, families
 
-parse_gedcom_file('sample.ged')
+if __name__ == "__main__":
+    parse_gedcom_file('sample.ged')
