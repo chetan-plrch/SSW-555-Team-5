@@ -178,6 +178,9 @@ def collect_family_metadata(individuals, families, clean_tags):
         check_if_birth_before_marriage(get_individual_data_by_key(individuals, husband_id, 'DATE'), married_date)
         check_if_birth_before_marriage(get_individual_data_by_key(individuals, wife_id, 'DATE'), married_date)
 
+        check_divorce_before_death(families,individuals) #US06
+        check_birth_after_parent_marriage(families,individuals) #US08
+
         y.add_row([key, married_date, divorce_date, husband_id, husband_name, wife_id, wife_name, children])
 
     print("Families")
@@ -307,16 +310,15 @@ def check_divorce_before_death(families, individuals):
         return True
     else:
         return False
-print("US06:" + str(check_divorce_before_death(y,x)))
 
 def check_birth_after_parent_marriage(families, individuals):
     is_valid = True
     for id in families:
-        if "MARR" in families[id] or "DATE" in families[id]:
-            marriageDate = datetime.datetime.strptime(families[id]["MARR"], "%d %b %Y").date()
-            for childID in families[id]["CHIL"]:
-                childBirthDate = datetime.datetime.strptime(
-                    individuals[childID]["DATE"], "%d %b %Y").date()
+        #if "MARR" in families[id]:
+        if get_family_data_by_key(families,id,"MARR"):
+            marriageDate = datetime.datetime.strptime(get_family_data_by_key(families,id,"MARR"), "%d %b %Y").date()
+            for childID in get_family_data_by_key(families,id,"CHIL"):
+                childBirthDate = datetime.datetime.strptime(get_family_data_by_key(families,id,"MARR"), "%d %b %Y").date()
                 if childBirthDate < marriageDate:
                     print("ANOMALY: FAMILY: US08: Child ("
                             + get_individual_name(childID, individuals).replace("/", "")
@@ -325,13 +327,13 @@ def check_birth_after_parent_marriage(families, individuals):
                             + ".")
                     is_valid = False
         else:
+            print(families[id])
             print("ERROR: FILE: US08: Marriage date not set or properly formatted of family: "
                 + id
                 + ".")
             is_valid = False
     return is_valid
 
-print("US08:" + str(check_birth_after_parent_marriage(y,x)))
 
 def parse_gedcom_file(file_name):
     individuals = {}
