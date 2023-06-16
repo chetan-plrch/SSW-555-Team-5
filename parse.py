@@ -190,21 +190,48 @@ def collect_family_metadata(individuals, families, clean_tags):
 # Story Id - US02:
 def check_if_birth_before_marriage(birth_date, marriage_date):
     #Birth before Marriage
-    if (birth_date == '-') or (marriage_date == '-'): return
+    if (birth_date == '-') and (marriage_date == '-'): return None
+    if (birth_date != '-') and (marriage_date == '-'): return None
+    
+    if (birth_date == '-') and (marriage_date != '-'):
+        err = "Birth Date needs to be present if marriage date is present"
+        print(err)
+        return err
 
     if birth_date and marriage_date:
         birth_date_formatted = datetime.datetime.strptime(birth_date, '%d %b %Y').date()
         if birth_date_formatted > marriage_date:
-            raise Exception('Birth date cannot be after marriage date')
+            err = "Birth date cannot be after marriage date"
+            print(err)
+            return err
+        
+        if birth_date_formatted == marriage_date:
+            err = "Birth date cannot be same as marriage date"
+            print(err)
+            return err
 
 # # Story Id - US03:
 def check_if_birth_before_death(birth_date, death_date):
     #Birth before Death
-    if (birth_date == '-') or (death_date == '-'): return
+    if (birth_date == '-') and (death_date == '-'): return None
+    if (birth_date != '-') and (death_date == '-'): return None
+
+    if (birth_date == '-') and (death_date != '-'):
+        err = "Birth Date needs to be present if death date is present"
+        print(err)
+        return err
 
     if birth_date and death_date:
+        # death_date_formatted = datetime.datetime.strptime(death_date, "%d %b %Y").date()
         if birth_date > death_date:
-            raise Exception("Birth date cannot be after death date")
+            err = "Birth date cannot be after death date"
+            print(err)
+            return err
+        
+        if birth_date == death_date:
+            err = "Birth date cannot be same as death date"
+            print(err)
+            return err
 
 # Story Id - US04:
 def check_if_married_before_divorce(marriage_date, divorce_date):
@@ -333,7 +360,6 @@ def check_birth_after_parent_marriage(families, individuals):
                 + ".")
             is_valid = False
     return is_valid
-
 
 def parse_gedcom_file(file_name):
     individuals = {}
