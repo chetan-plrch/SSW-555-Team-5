@@ -196,13 +196,13 @@ def check_if_birth_before_marriage(birth_date, marriage_date):
         return err
 
     if birth_date and marriage_date:
-        # birth_date_formatted = datetime.datetime.strptime(birth_date, '%d %b %Y').date()
-        if birth_date > marriage_date:
+        birth_date_formatted = datetime.datetime.strptime(birth_date, '%d %b %Y').date()
+        if birth_date_formatted > marriage_date:
             err = "Birth date cannot be after marriage date"
             print(err)
             return err
         
-        if birth_date == marriage_date:
+        if birth_date_formatted == marriage_date:
             err = "Birth date cannot be same as marriage date"
             print(err)
             return err
@@ -219,13 +219,13 @@ def check_if_birth_before_death(birth_date, death_date):
         return err
 
     if birth_date and death_date:
-        death_date_formatted = datetime.datetime.strptime(death_date, "%d %b %Y").date()
-        if birth_date > death_date_formatted:
+        # death_date_formatted = datetime.datetime.strptime(death_date, "%d %b %Y").date()
+        if birth_date > death_date:
             err = "Birth date cannot be after death date"
             print(err)
             return err
         
-        if birth_date == death_date_formatted:
+        if birth_date == death_date:
             err = "Birth date cannot be same as death date"
             print(err)
             return err
@@ -334,7 +334,6 @@ def check_divorce_before_death(families, individuals):
         return True
     else:
         return False
-print("US06:" + str(check_divorce_before_death(y,x)))
 
 def check_birth_after_parent_marriage(families, individuals):
     is_valid = True
@@ -357,8 +356,6 @@ def check_birth_after_parent_marriage(families, individuals):
                 + ".")
             is_valid = False
     return is_valid
-
-print("US08:" + str(check_birth_after_parent_marriage(y,x)))
 
 def parse_gedcom_file(file_name):
     individuals = {}
