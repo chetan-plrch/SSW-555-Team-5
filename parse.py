@@ -361,7 +361,34 @@ def check_birth_after_parent_marriage(families, individuals):
                 + ".")
             is_valid = False
     return is_valid
+    
+#Story US09:
+def birth_after_parent_death(parentA, parentB, child):
+    #Birth after parents death 
+    if(parentA == '-' or parentB == '-' or child == '-'):
+        return None
+    parentADeath = collect_individual_metadata(parentA,"DEAT")
+    parentBDeath = collect_individual_metadata(parentB,"DEAT")
+    childBirth = collect_individual_metadata(child,"BIRT")
+    if (childBirth > parentADeath or childBirth > parentBDeath):
+        print("ERROR: US09: Child born after death of parent")
+        return True
+    else:
+        return False
 
+#Story US10:
+def married_before_fourteen(marriage_year, birth_year):
+    # Marriage before age of 14
+    if (marriage_year == '-' or birth_year == '-'):
+        return None
+    ageAtMarriage = marriage_year-birth_year
+    if marriage_year:
+        if ageAtMarriage <= 14:
+            err = "ERROR: US10: Marriage date is before 14"
+            print(err)
+            return True
+    return False
+            
 def parse_gedcom_file(file_name):
     individuals = {}
     families = {}
