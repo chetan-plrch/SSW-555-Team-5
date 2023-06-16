@@ -24,7 +24,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip3 install prettytable dateutil
+        pip3 install prettytable python-dateutil
     - name: Run the main file
       run: |
         python3 parse.py
