@@ -128,42 +128,32 @@ def test_US06_5():
 # US08: Birth After Parents Marriage
 
 def test_US08_1():
-    Individuals = {'I3': [('NAME', 'Lawrence /Li/'), ('SEX', 'M'), ('DATE', '5 JAN 1998'), ('FAMC', 'F1'),
-                          ('ID', 'I3')
-                         ]}
+    Individuals = {'@I3@': [('NAME', 'Lawrence /Li/'), ('SEX', 'M'), ('DATE', '5 JAN 1998'), ('FAMC', 'F1'),('ID', '@I3@')]}
     Families = {'F1': [('HUSB', '@I1@'), ('WIFE','@I2@'), ('CHIL','@I3@'), ('MARR','30 APR 1997'), ('DIV', '30 APR 2018')]}
     assert check_birth_after_parent_marriage(Families,Individuals) == True
     print('Birth is after Parent Marriage')
 
 def test_US08_2():
-    Individuals = {'I3': [('NAME', 'Lawrence /Li/'), ('SEX', 'M'), ('DATE', '5 JAN 1998'), ('FAMC', 'F1'),
-                          ('ID', 'I3')
-                         ]}
+    Individuals = {'@I3@': [('NAME', 'Lawrence /Li/'), ('SEX', 'M'), ('DATE', '5 JAN 1998'), ('FAMC', 'F1'),('ID', '@I3@')]}
     Families = {'F1': [('HUSB', '@I1@'), ('WIFE','@I2@'), ('CHIL','@I3@'), ('MARR','30 APR 2000')]}
     assert check_birth_after_parent_marriage(Families,Individuals) == False
     print('Birth is after Parent Marriage')
 
 
 def test_US08_3():
-    Individuals = {'I3': [('NAME', 'Lawrence /Li/'), ('SEX', 'M'), ('DATE', '6 JAN 1998'), ('FAMC', 'F1'),
-                          ('ID', 'I3')
-                         ]}
+    Individuals = {'I3': [('NAME', 'Lawrence /Li/'), ('SEX', 'M'), ('DATE', '6 JAN 1998'), ('FAMC', 'F1'),('ID', '@I3@')]}
     Families = {'F1': [('HUSB', '@I1@'), ('WIFE','@I2@'), ('CHIL','@I3@')]}
     assert check_birth_after_parent_marriage(Families,Individuals) == False
     print('No Marriage Date')
 
 def test_US08_4():
-    Individuals = {'I3': [('NAME', 'Lawrence /Li/'), ('SEX', 'M'), ('DATE', '5 APR 2000'), ('FAMC', 'F1'),
-                          ('ID', 'I3')
-                         ]}
+    Individuals = {'I3': [('NAME', 'Lawrence /Li/'), ('SEX', 'M'), ('DATE', '5 APR 2000'), ('FAMC', 'F1'),('ID', '@I3@')]}
     Families = {'F1': [('HUSB', '@I1@'), ('WIFE','@I2@'), ('CHIL','@I3@'), ('MARR','30 APR 2000')]}
     assert check_birth_after_parent_marriage(Families,Individuals) == False
     print('Birth is after Parent Marriage')
 
 def test_US08_5():
-    Individuals = {'I3': [('NAME', 'Lawrence /Li/'), ('SEX', 'M'), ('DATE', '4 JAN 2000'), ('FAMC', 'F1'),
-                          ('ID', 'I3')
-                         ]}
+    Individuals = {'I3': [('NAME', 'Lawrence /Li/'), ('SEX', 'M'), ('DATE', '4 JAN 2000'), ('FAMC', 'F1'),('ID', '@I3@')]}
     Families = {'F1': [('HUSB', '@I1@'), ('WIFE','@I2@'), ('CHIL','@I3@'), ('MARR','3 JAN 2000')]}
     assert check_birth_after_parent_marriage(Families,Individuals) == True
     print('Marriage After Birthday')

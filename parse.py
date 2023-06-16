@@ -317,15 +317,19 @@ def check_birth_after_parent_marriage(families, individuals):
         #if "MARR" in families[id]:
         if get_family_data_by_key(families,id,"MARR"):
             marriageDate = datetime.datetime.strptime(get_family_data_by_key(families,id,"MARR"), "%d %b %Y").date()
-            for childID in get_family_data_by_key(families,id,"CHIL"):
-                childBirthDate = datetime.datetime.strptime(get_family_data_by_key(families,id,"MARR"), "%d %b %Y").date()
-                if childBirthDate < marriageDate:
-                    print("ANOMALY: FAMILY: US08: Child ("
+            childID = get_family_data_by_key(families,id,"CHIL")
+            childBirthDate = datetime.datetime.strptime(get_individual_data_by_key(individuals, childID,"DATE"), "%d %b %Y").date()
+            print("Child Birth Date:")
+            print(childBirthDate)
+            print("Marriage Date:")
+            print(marriageDate)
+            if childBirthDate < marriageDate:
+                print("ANOMALY: FAMILY: US08: Child ("
                             + get_individual_name(childID, individuals).replace("/", "")
                             + ") born before marriage of parents in family: "
                             + id
                             + ".")
-                    is_valid = False
+                is_valid = False
         else:
             print(families[id])
             print("ERROR: FILE: US08: Marriage date not set or properly formatted of family: "
@@ -350,4 +354,5 @@ def parse_gedcom_file(file_name):
     collect_family_metadata(individuals, families, clean_tags)
     return individuals, families
 
-parse_gedcom_file('sample.ged')
+if __name__ == '__main__':
+    parse_gedcom_file('sample.ged')
