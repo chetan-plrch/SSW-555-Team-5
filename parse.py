@@ -190,8 +190,10 @@ def collect_family_metadata(individuals, families, clean_tags):
 # Story Id - US02:
 def check_if_birth_before_marriage(birth_date, marriage_date):
     #Birth before Marriage
-    if (birth_date == '-') and (marriage_date == '-'): return None
-    if (birth_date != '-') and (marriage_date == '-'): return None
+    if (birth_date == '-') and (marriage_date == '-'): 
+        return None
+    if (birth_date != '-') and (marriage_date == '-'): 
+        return None
     
     if (birth_date == '-') and (marriage_date != '-'):
         err = "Birth Date needs to be present if marriage date is present"
@@ -222,7 +224,6 @@ def check_if_birth_before_death(birth_date, death_date):
         return err
 
     if birth_date and death_date:
-        # death_date_formatted = datetime.datetime.strptime(death_date, "%d %b %Y").date()
         if birth_date > death_date:
             err = "Birth date cannot be after death date"
             print(err)

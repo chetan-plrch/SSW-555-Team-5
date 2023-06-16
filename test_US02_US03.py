@@ -4,7 +4,7 @@ import datetime
 
 class MyTestCase(unittest.TestCase):
     def test_US02_1(self):
-        self.assertIsNone(parse.check_if_birth_before_marriage('-', '-'))
+        self.assertEqual(parse.check_if_birth_before_marriage('-', '-'), None)
         print('US02 Test Case 1 Passed: Birth date and marriage date are not present')
 
     def test_US02_2(self):
@@ -16,11 +16,11 @@ class MyTestCase(unittest.TestCase):
         print('US02 Test Case 3 Passed: Birth date is present and marriage date is not present')
 
     def test_US02_4(self):
-        self.assertEqual(parse.check_if_birth_before_marriage('1998-07-11', '1992-09-11'), 'Birth date cannot be after marriage date')
+        self.assertEqual(parse.check_if_birth_before_marriage('11 JUL 1998', datetime.datetime.strptime('11 SEP 1992', '%d %b %Y').date()), 'Birth date cannot be after marriage date')
         print('US02 Test Case 4 Passed: Birth date should not be after marriage date')
 
     def test_US02_5(self):
-        self.assertEqual(parse.check_if_birth_before_marriage('2005-09-01', '2005-09-01'), 'Birth date cannot be same as marriage date')
+        self.assertEqual(parse.check_if_birth_before_marriage('01 JAN 2005', datetime.datetime.strptime('01 JAN 2005', '%d %b %Y').date()), 'Birth date cannot be same as marriage date')
         print('US02 Test Case 5 Passed: Birth date should not be same as marriage date')
 
 
@@ -37,18 +37,18 @@ class MyTestCase(unittest.TestCase):
         print('US03 Test Case 3 Passed: Birth date is not present and death date is present')
 
     def test_US03_4(self):
-        self.assertEqual(parse.check_if_birth_before_death(datetime.datetime.strptime('1998-15-08', '%Y-%d-%m').date(), '01 JAN 1995'),
+        self.assertEqual(parse.check_if_birth_before_death('15 AUG 1998', '01 JAN 1995'),
                          'Birth date cannot be after death date')
         print('US03 Test Case 4 Passed: Birth date cannot be after death date')
 
     def test_US03_5(self):
-        self.assertEqual(parse.check_if_birth_before_death(datetime.datetime.strptime('1999-14-11', '%Y-%d-%m').date(), '14 NOV 1999'),
+        self.assertEqual(parse.check_if_birth_before_death('14 NOV 1999', '14 NOV 1999'),
                          'Birth date cannot be same as death date')
-        print('US04 Test Case 5 Passed: Birth date cannot be same as death date')
+        print('US03 Test Case 5 Passed: Birth date cannot be same as death date')
 
     def test_US03_6(self):
-        self.assertIsNone(parse.check_if_birth_before_death(datetime.datetime.strptime('1995-01-12', '%Y-%d-%m').date(), '12 FEB 2012'))
-        print('US04 Test Case 6 Passed: Birth date is before death date')        
+        self.assertIsNone(parse.check_if_birth_before_death('01 DEC 1995', '12 FEB 2012'))
+        print('US03 Test Case 6 Passed: Birth date is before death date')        
         
 if __name__ == '__main__':
     unittest.main()
