@@ -180,6 +180,8 @@ def collect_family_metadata(individuals, families, clean_tags):
 
         check_divorce_before_death(families,individuals) #US06
         check_birth_after_parent_marriage(families,individuals) #US08
+        check_age_under_onefifty(individuals) #US07
+        check_gender_role(families, individuals)#US21
 
         y.add_row([key, married_date, divorce_date, husband_id, husband_name, wife_id, wife_name, children])
 
@@ -388,6 +390,47 @@ def married_before_fourteen(marriage_year, birth_year):
             print(err)
             return True
     return False
+
+
+#US07
+def check_age(birth_date):
+    today = datetime.datetime.today()
+    birth = datetime.datetime.strptime(birth_date, "%d %b %Y")
+    age_from_today = today - birth
+    age = age_from_today.days
+    return age
+
+def check_age_under_onefifty(individuals):
+    is_valid = True
+    birth_date = 0
+    for id in individuals:
+        individual = individuals[id]
+        birthday = get_individual_data_by_key(individuals,id,"DATE")
+        day_age = check_age(birthday)
+        age = day_age/365.25
+        if age >= 150:
+            is_valid = False
+            print("Age is over 150")
+    return is_valid    
+
+#US21
+def check_gender_role(families, individuals):
+    is_valid = True
+    husbID = get_family_data_by_key(families,id,"HUSB")
+    return husbID
+    if husbID:
+        Gender = get_individual_data_by_key(individuals,husbID,"SEX")
+        if Gender != "M":
+            print("Gender does not match Marriage Role")
+            is_valid = False
+    WifeID = get_family_data_by_key(families,id,"WIFE")
+    if WifeID:
+        Gender = get_individual_data_by_key(individuals,WifeID,"SEX")
+        if Gender != "F":
+            print("Gender does not match Marriage Role")
+            is_valid = False
+    return is_valid
+
             
 def parse_gedcom_file(file_name):
     individuals = {}
