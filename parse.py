@@ -367,9 +367,23 @@ def birth_after_parent_death(parentA, parentB, child):
     #Birth after parents death 
     if(parentA == '-' or parentB == '-' or child == '-'):
         return None
-    parentADeath = collect_individual_metadata(parentA,"DEAT")
-    parentBDeath = collect_individual_metadata(parentB,"DEAT")
-    childBirth = collect_individual_metadata(child,"BIRT")
+    childBirth= datetime.datetime(2, 2, 2).date()
+    parentADeath= datetime.datetime(9999, 1, 1).date()
+    parentBDeath= datetime.datetime(9999, 1, 1).date()
+    is_dead = False
+    childBirth = datetime.datetime.strptime(child['DATE'], "%d %b %Y").date()
+    for id in parentA:  
+        if id == "DEAT":
+            is_dead = True
+            parentADeath = temp
+        if id == "DATE":
+            temp = datetime.datetime.strptime(parentA[id], "%d %b %Y").date()
+    for id in parentB:  
+        if id == "DEAT":
+            is_dead = True
+            parentBDeath = temp
+        if id == "DATE":
+            temp = datetime.datetime.strptime(parentB[id], "%d %b %Y").date()
     if (childBirth > parentADeath or childBirth > parentBDeath):
         print("ERROR: US09: Child born after death of parent")
         return True
