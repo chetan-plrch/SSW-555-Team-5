@@ -194,6 +194,8 @@ def collect_family_metadata(individuals, families, clean_tags):
 
         check_age_under_onefifty(individuals) #US07
         check_gender_role(families, individuals) #US21
+        large_age_difference(families, individuals) #US34
+        recent_births(individuals) #US35
 
         y.add_row([key, married_date, divorce_date, husband_id, husband_name, wife_id, wife_name, children])
 
@@ -414,6 +416,46 @@ def check_gender_role(families, individuals):
                 print("Gender does not match Marriage Role")
                 is_valid = False
         return is_valid
+
+#US34
+def large_age_difference(families, individuals):
+    is_valid = True
+    for id in families:
+        husbID = get_family_data_by_key(families,id,"HUSB")
+        if husbID:
+            husb_bday = get_individual_data_by_key(individuals,husbID,"DATE")
+            husb_age1 = check_age(husb_bday)
+            husb_age = husb_age1/365.25
+            print(husb_age)
+        wifeID = get_family_data_by_key(families,id,"WIFE")
+        if wifeID:
+            wife_bday = get_individual_data_by_key(individuals,wifeID,"DATE")
+            wife_age1 = check_age(wife_bday)
+            wife_age = wife_age1/365.25
+            print(wife_age)
+        if husb_age > 2*wife_age:
+            print("Husband ", husbID, "is more than 2 times older than Wife ", wifeID)
+        elif wife_age >2*husb_age:
+            print("Wife ", wifeID, "is more than 2 times older than Husband ", husbID)
+        else:
+            print("Husband, ",husbID,"& Wife, ",wifeID,"do not have a large age gap")
+            is_valid = False
+        
+        return is_valid
+
+#US35
+def recent_births(individuals):
+    is_valid = True
+    for id in individuals:
+        individual = individuals[id]
+        birthday = get_individual_data_by_key(individuals,id,"DATE")
+        day_age = check_age(birthday)
+        if day_age > 30:
+            is_valid = False
+            print("Born more than 30 days ago")
+    return is_valid
+    print("Born Recently")
+
 
 
 def parse_gedcom_file(file_name):
