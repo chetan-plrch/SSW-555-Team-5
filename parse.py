@@ -21,6 +21,22 @@ def get_family_data_by_key(families, id, key):
         if meta[0] == key: meta_data = meta[1]
     return meta_data
 
+def get_marriage_date_by_key(families, id, key):
+    meta_data = []
+
+    for meta in families[id]:
+        if meta[0] == "MARR":
+            meta_data.append(meta[1]) 
+    return meta_data
+
+def get_div_date_by_key(families, id, key):
+    meta_data = []
+    
+    for meta in families[id]:
+        if meta[0] == "DIV":
+            meta_data.append(meta[1]) 
+    return meta_data
+
 def is_not_supported_tags(level, tag):
     return (level == 1 and tag == 'DATE') or (level == 2 and tag == 'NAME')
 
@@ -180,6 +196,7 @@ def collect_family_metadata(individuals, families, clean_tags):
 
         check_divorce_before_death(families,individuals) #US06
         check_birth_after_parent_marriage(families,individuals) #US08
+        noBigamy(families, individuals)
 
         y.add_row([key, married_date, divorce_date, husband_id, husband_name, wife_id, wife_name, children])
 
@@ -388,7 +405,94 @@ def married_before_fourteen(marriage_year, birth_year):
             print(err)
             return True
     return False
+
+#Story US11
+def noBigamy(families, individuals):
+    err = None
+    husb_ID = ""
+    wife_ID = ""
+    myDict = {}
+    divDict = {}
+    for id in families:
+        for item in families[id]:
+            if item[0] == "HUSB":
+                husb_ID = item[1]
+                myDict.setdefault(husb_ID)
+                divDict.setdefault(husb_ID)
+            elif item[0] == "WIFE":
+                wife_ID = item[1]
+                myDict.setdefault(wife_ID)
+                divDict.setdefault(wife_ID)
+
+    for key, values in myDict.items():
+        for id in families:
+            fam_husbId = get_family_data_by_key(families, id, 'HUSB')
+            fam_wifeId = get_family_data_by_key(families, id, 'WIFE')
             
+            if key == fam_husbId or key == fam_wifeId:
+                marr_date = get_marriage_date_by_key(families, id, key)
+
+                if key in myDict:
+                    if isinstance(myDict[key], list):
+                        myDict[key].append(marr_date)
+                    else:
+                        myDict[key] = [myDict[key], marr_date]
+                else:
+                    myDict[key] = [marr_date]
+    
+    for key, values in divDict.items():
+        for id in families:
+            fam_husbId = get_family_data_by_key(families, id, 'HUSB')
+            fam_wifeId = get_family_data_by_key(families, id, 'WIFE')
+            if key == fam_husbId or key == fam_wifeId:
+                div_date = get_div_date_by_key(families, id, key)
+                
+                if key in divDict:
+                    if isinstance(divDict[key], list):
+                        divDict[key].append(div_date)
+                    else:
+                        divDict[key] = [divDict[key], div_date]
+                else:
+                    divDict[key] = [div_date]
+                 
+    updated_myDict = {key: [val for val in value if val is not None] for key, value in myDict.items()}
+    updated_divDict = {key: [val for val in value if val is not None] for key, value in divDict.items()}
+
+    for key in myDict:
+        if key in divDict:
+            my_dates = [date for sublist in myDict[key] if sublist for date in sublist] 
+            div_dates = [date for sublist in divDict[key] if sublist for date in sublist]
+
+            new_my_dates = [datetime.datetime.strptime(date, '%d %b %Y').date() for date in my_dates]
+            new_div_dates = [datetime.datetime.strptime(date, '%d %b %Y').date() for date in div_dates]
+           
+            if len(new_my_dates) >= 2 and len(new_div_dates) >= 1:
+                for i in range(len(new_my_dates) - 1):
+                    if new_div_dates[i] > new_my_dates[i] and new_div_dates[i] < new_my_dates[i+1]:
+                        err = "No Bigamy"
+
+                    else:
+                        err = "Bigamy caught"
+            
+            elif (len(new_my_dates) == 2 and (len(new_div_dates) == 1 or len(new_div_dates) == 0)):
+                if len(new_div_dates) == 0:
+                    err = "Bigamy caught"
+            
+                else:
+                    lesser_date = min(new_my_dates)
+                    greater_date = max(new_my_dates)
+                    div_date = new_div_dates[0]
+            
+                    if lesser_date < div_date < greater_date:
+                        err = "No Bigamy"
+
+                    else:
+                        err = "Bigamy caught"
+    
+            else:
+                err = "No Bigamy"
+    return err
+
 def parse_gedcom_file(file_name):
     individuals = {}
     families = {}
@@ -404,4 +508,4 @@ def parse_gedcom_file(file_name):
     collect_family_metadata(individuals, families, clean_tags)
     return individuals, families
 
-parse_gedcom_file('sample.ged')
+parse_gedcom_file('sample_new.ged')
