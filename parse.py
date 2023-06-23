@@ -214,7 +214,7 @@ def collect_family_metadata(individuals, families, clean_tags):
         check_if_birth_before_marriage(get_individual_data_by_key(individuals, wife_id, 'DATE'), married_date)
 
         check_divorce_before_death(families,individuals) #US06
-        check_birth_after_parent_marriage(families,individuals) #US08
+        # check_birth_after_parent_marriage(families,individuals) #US08
         noBigamy(families, individuals)
 
         y.add_row([key, married_date, divorce_date, husband_id, husband_name, wife_id, wife_name, children])
