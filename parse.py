@@ -481,17 +481,17 @@ def noBigamy(families, individuals):
         if key in divDict:
             my_dates = [date for sublist in myDict[key] if sublist for date in sublist] 
             div_dates = [date for sublist in divDict[key] if sublist for date in sublist]
-
             new_my_dates = [datetime.datetime.strptime(date, '%d %b %Y').date() for date in my_dates]
             new_div_dates = [datetime.datetime.strptime(date, '%d %b %Y').date() for date in div_dates]
-           
-            if len(new_my_dates) >= 2 and len(new_div_dates) >= 1:
+            
+            if len(new_my_dates) > 2 and len(new_div_dates) > 1:
                 for i in range(len(new_my_dates) - 1):
                     if new_div_dates[i] > new_my_dates[i] and new_div_dates[i] < new_my_dates[i+1]:
                         err = "No Bigamy"
 
                     else:
                         err = "Bigamy caught"
+                    return(err)
             
             elif (len(new_my_dates) == 2 and (len(new_div_dates) == 1 or len(new_div_dates) == 0)):
                 if len(new_div_dates) == 0:
@@ -507,6 +507,7 @@ def noBigamy(families, individuals):
 
                     else:
                         err = "Bigamy caught"
+                return err
     
             else:
                 err = "No Bigamy"
