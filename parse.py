@@ -2,6 +2,25 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from prettytable import PrettyTable
 
+def get_all_family_data_by_key(individuals, id, key):
+    meta_data = []
+    for meta in individuals[id]:
+        if meta[0] == key: meta_data.append(meta[1])
+    return meta_data
+
+def get_all_husband_and_wives(families):
+    husband_and_wives = []
+    for family_id, family_values in families.items():
+        hub = get_family_data_by_key(families, family_id, 'HUSB')
+        wife = get_family_data_by_key(families, family_id, 'WIFE')
+
+        if hub and wife:
+            husband_and_wives.append((hub, wife))
+        else:
+            print('ERROR: Husband or Wife ID not present for a pair')
+    return husband_and_wives
+
+
 def get_individual_data_by_key(individuals, id, key):
     # Example Individual data: key(NAME, SEX, DATE, DEAT, FAMS, FAMC)
     # {
@@ -282,12 +301,12 @@ def check_if_married_before_death(marriage_date, death_date):
     if marriage_date and death_date:
         death_date_formatted = datetime.datetime.strptime(death_date, '%d %b %Y').date()
         if marriage_date > death_date_formatted:
-            err = "ERROR: US04: Marriage date cannot be after death date"
+            err = "ERROR: US05: Marriage date cannot be after death date"
             print(err)
             return err
 
         if marriage_date == death_date_formatted:
-            err = "ERROR: US04: Marriage date cannot be equal to death date"
+            err = "ERROR: US05: Marriage date cannot be equal to death date"
             print(err)
             return err
 
@@ -493,6 +512,29 @@ def noBigamy(families, individuals):
                 err = "No Bigamy"
     return err
 
+
+# Story Id: US18
+def sibling_should_not_marry(families):
+    invalid = False
+    husb_wives = get_all_husband_and_wives(families)
+    for family_id, family_data in families.items():
+        sibling_ids = get_all_family_data_by_key(families, family_id, 'CHIL')
+        for hub_id, wife_id in husb_wives:
+            if (hub_id in sibling_ids) and (wife_id in sibling_ids):
+                invalid = True
+                print(f"ERROR: US18: Siblings {hub_id} and {wife_id} should not marry.")
+    return invalid
+
+# Story Id: US15
+def fewer_than_15_siblings(families):
+    invalid = False
+    for family_id, family_data in families.items():
+        siblings = get_all_family_data_by_key(families, family_id, 'CHIL')
+        if len(siblings) > 15:
+            invalid = True
+            print(f"ERROR: US15: Family has more than 15 siblings")
+    return invalid
+
 def parse_gedcom_file(file_name):
     individuals = {}
     families = {}
@@ -506,6 +548,8 @@ def parse_gedcom_file(file_name):
     # clean_tags = clean_gedcom_tags('sample.ged', supported_tags)
     collect_individual_metadata(individuals, clean_tags)
     collect_family_metadata(individuals, families, clean_tags)
+    sibling_should_not_marry(families)
+    fewer_than_15_siblings(families)
     return individuals, families
 
 parse_gedcom_file('sample_new.ged')
