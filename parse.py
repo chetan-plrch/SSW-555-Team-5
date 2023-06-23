@@ -422,10 +422,13 @@ def sibling_should_not_marry(families):
 
 # Story Id: US15
 def fewer_than_15_siblings(families):
+    invalid = False
     for family_id, family_data in families.items():
         siblings = get_all_family_data_by_key(families, family_id, 'CHIL')
         if len(siblings) > 15:
+            invalid = True
             print(f"ERROR: US15: Family has more than 15 siblings")
+    return invalid
 
 def parse_gedcom_file(file_name):
     individuals = {}
