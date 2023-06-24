@@ -587,6 +587,37 @@ def fewer_than_15_siblings(families):
             print(f"ERROR: US15: Family has more than 15 siblings")
     return invalid
 
+# Story Id: US17
+def parents_should_not_marry_descendants(individuals, families):
+    invalid = False
+    for ind_id in individuals:
+        children_ids = get_all_data_of_a_person(families, ind_id, 'CHIL')
+        for child_id in children_ids:
+            for family_id in families:
+                husb_id = get_family_data_by_key(families, family_id, 'HUSB')
+                wife_id = get_family_data_by_key(families, family_id, 'WIFE')
+
+                if ((ind_id == husb_id) and (child_id == wife_id) or (ind_id == wife_id) and (child_id == husb_id)):
+                    invalid = True
+                    print(f"ERROR: US17: Parent is married to their descendant")
+    return invalid
+
+# Story Id: US25
+def child_should_not_have_same_name_date(individuals, families):
+    invalid = False
+    for ind_id in individuals:
+        children_ids = get_all_data_of_a_person(families, ind_id, 'CHIL')
+        s = {}
+        for child_id in children_ids:
+            child_name = get_individual_data_by_key(individuals, child_id, 'NAME')
+            child_birth_date = get_individual_data_by_key(individuals, child_id, 'DATE')
+            if f'{child_name}_{child_birth_date}' in s:
+                invalid = True
+                print(f"ERROR: US25: Two child have same name and birth date")
+            else:
+                s[f'{child_name}_{child_birth_date}'] = True
+    return invalid
+
 def parse_gedcom_file(file_name):
     individuals = {}
     families = {}
@@ -603,6 +634,8 @@ def parse_gedcom_file(file_name):
     fewer_than_15_siblings(families)
     too_many_siblings_at_same_time(individuals, families)
     mother_is_not_too_old_for_child(individuals, families)
+    parents_should_not_marry_descendants(individuals, families)
+    child_should_not_have_same_name_date(individuals, families)
     return individuals, families
 
 parse_gedcom_file('sample_new.ged')
