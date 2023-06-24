@@ -2,10 +2,30 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from prettytable import PrettyTable
 
-def get_all_family_data_by_key(individuals, id, key):
+def get_all_individual_data_by_key(individuals, id, key):
     meta_data = []
     for meta in individuals[id]:
         if meta[0] == key: meta_data.append(meta[1])
+    return meta_data
+
+def get_all_data_of_a_person(families, person_id, key):
+    family_ids, child_ids = [], []
+
+    for id in families:
+        for meta in families[id]:
+            if ((meta[0] == 'WIFE') or (meta[0] == 'HUSB')) and (meta[1] == person_id): family_ids.append(id)
+
+    for id in family_ids:
+        for meta in families[id]:
+            if meta[0] == key: child_ids.append(meta[1])
+
+    return child_ids
+
+def get_from_all_records_all_family_data(families, key):
+    meta_data = []
+    for id in families:
+        for meta in families[id]:
+            if meta[0] == key: meta_data.append(meta[1])
     return meta_data
 
 def get_all_husband_and_wives(families):
@@ -20,15 +40,7 @@ def get_all_husband_and_wives(families):
             print('ERROR: Husband or Wife ID not present for a pair')
     return husband_and_wives
 
-
 def get_individual_data_by_key(individuals, id, key):
-    # Example Individual data: key(NAME, SEX, DATE, DEAT, FAMS, FAMC)
-    # {
-    #     'I2': [
-    #         ('NAME', 'Elena /Golecha/'), ('SEX', 'F'), ('DATE', '1 JAN 1976'),
-    #         ('DEAT', '1 JAN 2012'), ('FAMS', 'F1'), ('FAMC', 'F2')
-    #     ],
-    # }
     meta_data = None
     for meta in individuals[id]:
         if meta[0] == key: meta_data = meta[1]
@@ -519,18 +531,57 @@ def sibling_should_not_marry(families):
     invalid = False
     husb_wives = get_all_husband_and_wives(families)
     for family_id, family_data in families.items():
-        sibling_ids = get_all_family_data_by_key(families, family_id, 'CHIL')
+        sibling_ids = get_all_individual_data_by_key(families, family_id, 'CHIL')
         for hub_id, wife_id in husb_wives:
             if (hub_id in sibling_ids) and (wife_id in sibling_ids):
                 invalid = True
                 print(f"ERROR: US18: Siblings {hub_id} and {wife_id} should not marry.")
     return invalid
 
+# Story Id: US14 (No more than five siblings should be born at the same time)
+def too_many_siblings_at_same_time(individuals, families):
+    invalid = False
+    for ind_id in individuals:
+        children_ids = get_all_data_of_a_person(families, ind_id, 'CHIL')
+        same_date_count = {}
+        for child_id in children_ids:
+            birth_date = get_individual_data_by_key(individuals, child_id, 'DATE')
+            if birth_date in same_date_count:
+                same_date_count[birth_date] += 1
+            else:
+                same_date_count[birth_date] = 0
+
+        for sibling_on_same_time_count in same_date_count.values():
+            if sibling_on_same_time_count > 5:
+                print(f"ERROR: US14: No more than five siblings should be born at the same time")
+                invalid = True
+    return invalid
+
+# Story Id: US12 (Mother should be less than 60 years older than her children)
+def mother_is_not_too_old_for_child(individuals, families):
+    invalid = False
+    for ind_id in individuals:
+        gender = get_individual_data_by_key(individuals, ind_id, 'SEX')
+        if gender == 'F':
+            mother_birth_date = get_individual_data_by_key(individuals, ind_id, 'DATE')
+            children_ids = get_all_data_of_a_person(families, ind_id, 'CHIL')
+            for child_id in children_ids:
+                child_birth_date = get_individual_data_by_key(individuals, child_id, 'DATE')
+                delta_years = relativedelta(
+                    datetime.datetime.strptime(child_birth_date, '%d %b %Y').date(),
+                    datetime.datetime.strptime(mother_birth_date, '%d %b %Y').date()
+                ).years
+                if delta_years >= 60:
+                    invalid = True
+                    print(f"ERROR: US12: Mother should be less than 60 years older than her children")
+
+    return invalid
+
 # Story Id: US15
 def fewer_than_15_siblings(families):
     invalid = False
     for family_id, family_data in families.items():
-        siblings = get_all_family_data_by_key(families, family_id, 'CHIL')
+        siblings = get_all_individual_data_by_key(families, family_id, 'CHIL')
         if len(siblings) > 15:
             invalid = True
             print(f"ERROR: US15: Family has more than 15 siblings")
@@ -546,11 +597,12 @@ def parse_gedcom_file(file_name):
         'TRLR': '0', 'NOTE': '0'
     }
     clean_tags = clean_gedcom_tags(file_name, supported_tags)
-    # clean_tags = clean_gedcom_tags('sample.ged', supported_tags)
     collect_individual_metadata(individuals, clean_tags)
     collect_family_metadata(individuals, families, clean_tags)
     sibling_should_not_marry(families)
     fewer_than_15_siblings(families)
+    too_many_siblings_at_same_time(individuals, families)
+    mother_is_not_too_old_for_child(individuals, families)
     return individuals, families
 
 parse_gedcom_file('sample_new.ged')
