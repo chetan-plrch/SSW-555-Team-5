@@ -615,7 +615,7 @@ def parents_should_not_marry_descendants(individuals, families):
                     invalid = True
                     print(f"ERROR: US17: Parent is married to their descendant")
     return invalid
-
+    
 # Story Id: US25
 def child_should_not_have_same_name_date(individuals, families):
     invalid = False
@@ -631,7 +631,60 @@ def child_should_not_have_same_name_date(individuals, families):
             else:
                 s[f'{child_name}_{child_birth_date}'] = True
     return invalid
-
+    
+# Story Id - US22:
+def unique_id(individuals, families):
+    if(individuals == '-' or families == '-'):
+        return None
+    i = 0
+    j = 0
+    for ind in individuals:
+        for ind2 in individuals:
+            if(j >= len(individuals)):
+                continue
+            elif(i < j):
+                 if(ind == ind2):
+                     return False
+            j = j + 1
+        i = i + 1
+        j = i + 1
+    x = 0
+    y = 0
+    for fam in families:
+        for fam2 in families:
+            if(y >= len(families)):
+                continue
+            elif(x < y):
+                if(fam == fam2):
+                    return False
+            y = y + 1
+        x = x + 1
+        y = x +1    
+    return True
+    
+# Story Id - US23:
+def unique_name_and_birth(individuals):
+    if(individuals == '-'):
+        return None;
+    i = 0
+    j = 0
+    for ind in individuals:
+        ind_name = get_individual_data_by_key(individuals, ind, 'NAME')
+        ind_birth = get_individual_data_by_key(individuals, ind, 'DATE')
+        for ind2 in individuals:
+            ind2_name = get_individual_data_by_key(individuals, ind2, 'NAME')
+            ind2_birth = get_individual_data_by_key(individuals, ind2, 'DATE')
+            if(j >= len(individuals)):
+                continue
+            elif(i < j and ind_name != None):
+                 if(ind_name == ind2_name and ind_birth == ind2_birth):
+                     return False
+            j = j + 1
+        i = i + 1
+        j = i + 1
+        
+    return True
+    
 def parse_gedcom_file(file_name):
     individuals = {}
     families = {}
