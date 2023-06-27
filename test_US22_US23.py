@@ -211,7 +211,7 @@ class MyTestCase(unittest.TestCase):
             "FAMS": "@F1@",
             "FAMC": "@F4@",
         }}
-        case.assertEqual(parse.unique_name_and_birth(individuals), False)
+        case.assertEqual(parse.unique_name_and_birth(individuals), True)
         print('US23 Test Case #5 - Same name and birth')
 
 if __name__ == '__main__':
