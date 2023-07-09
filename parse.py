@@ -30,7 +30,7 @@ def get_family_data_by_key(families, id, key):
         if tuple[0] == key:
             return tuple[1]
     #if execution reaches here key was not found
-    return false
+    return False
 
 def is_not_supported_tags(level, tag):
     return (level == 1 and tag == 'DATE') or (level == 2 and tag == 'NAME')
@@ -405,14 +405,14 @@ def check_gender_role(families, individuals):
     for id in families:
         husbID = get_family_data_by_key(families,id,"HUSB")
         if husbID:
-            Gender = get_individual_data_by_key(individuals,husbID,"SEX")
-            if Gender != "M":
+            gender = get_individual_data_by_key(individuals,husbID,"SEX")
+            if gender != "M":
                 print("Gender does not match Marriage Role")
                 is_valid = False
         wifeID = get_family_data_by_key(families,id,"WIFE")
         if wifeID:
-            Gender = get_individual_data_by_key(individuals,wifeID,"SEX")
-            if Gender != "F":
+            gender = get_individual_data_by_key(individuals,wifeID,"SEX")
+            if gender != "F":
                 print("Gender does not match Marriage Role")
                 is_valid = False
         return is_valid

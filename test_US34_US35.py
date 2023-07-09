@@ -8,7 +8,7 @@ def test_US35_1():
         ("NAME", "Lawrence /Li/"),
         ("SEX","M"),
         ("BIRT", ""),
-        ("DATE", "5 JUN 2023"),
+        ("DATE", "5 JUL 2023"),
         ("FAMC", "@F1@")
     ]}
     assert recent_births(individuals) == True
