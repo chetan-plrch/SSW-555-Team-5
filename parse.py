@@ -2,14 +2,45 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from prettytable import PrettyTable
 
+def get_all_individual_data_by_key(individuals, id, key):
+    meta_data = []
+    for meta in individuals[id]:
+        if meta[0] == key: meta_data.append(meta[1])
+    return meta_data
+
+def get_all_data_of_a_person(families, person_id, key):
+    family_ids, child_ids = [], []
+
+    for id in families:
+        for meta in families[id]:
+            if ((meta[0] == 'WIFE') or (meta[0] == 'HUSB')) and (meta[1] == person_id): family_ids.append(id)
+
+    for id in family_ids:
+        for meta in families[id]:
+            if meta[0] == key: child_ids.append(meta[1])
+
+    return child_ids
+
+def get_from_all_records_all_family_data(families, key):
+    meta_data = []
+    for id in families:
+        for meta in families[id]:
+            if meta[0] == key: meta_data.append(meta[1])
+    return meta_data
+
+def get_all_husband_and_wives(families):
+    husband_and_wives = []
+    for family_id, family_values in families.items():
+        hub = get_family_data_by_key(families, family_id, 'HUSB')
+        wife = get_family_data_by_key(families, family_id, 'WIFE')
+
+        if hub and wife:
+            husband_and_wives.append((hub, wife))
+        else:
+            print('ERROR: Husband or Wife ID not present for a pair')
+    return husband_and_wives
+
 def get_individual_data_by_key(individuals, id, key):
-    # Example Individual data: key(NAME, SEX, DATE, DEAT, FAMS, FAMC)
-    # {
-    #     'I2': [
-    #         ('NAME', 'Elena /Golecha/'), ('SEX', 'F'), ('DATE', '1 JAN 1976'),
-    #         ('DEAT', '1 JAN 2012'), ('FAMS', 'F1'), ('FAMC', 'F2')
-    #     ],
-    # }
     meta_data = None
     for meta in individuals[id]:
         if meta[0] == key: meta_data = meta[1]
@@ -31,6 +62,22 @@ def get_family_data_by_key(families, id, key):
             return tuple[1]
     #if execution reaches here key was not found
     return False
+
+def get_marriage_date_by_key(families, id, key):
+    meta_data = []
+
+    for meta in families[id]:
+        if meta[0] == "MARR":
+            meta_data.append(meta[1]) 
+    return meta_data
+
+def get_div_date_by_key(families, id, key):
+    meta_data = []
+    
+    for meta in families[id]:
+        if meta[0] == "DIV":
+            meta_data.append(meta[1]) 
+    return meta_data
 
 def is_not_supported_tags(level, tag):
     return (level == 1 and tag == 'DATE') or (level == 2 and tag == 'NAME')
@@ -190,7 +237,8 @@ def collect_family_metadata(individuals, families, clean_tags):
         check_if_birth_before_marriage(get_individual_data_by_key(individuals, wife_id, 'DATE'), married_date)
 
         check_divorce_before_death(families,individuals) #US06
-        check_birth_after_parent_marriage(families,individuals) #US08
+        # check_birth_after_parent_marriage(families,individuals) #US08
+        noBigamy(families, individuals)
 
         check_age_under_onefifty(individuals) #US07
         check_gender_role(families, individuals) #US21
@@ -281,12 +329,12 @@ def check_if_married_before_death(marriage_date, death_date):
     if marriage_date and death_date:
         death_date_formatted = datetime.datetime.strptime(death_date, '%d %b %Y').date()
         if marriage_date > death_date_formatted:
-            err = "ERROR: US04: Marriage date cannot be after death date"
+            err = "ERROR: US05: Marriage date cannot be after death date"
             print(err)
             return err
 
         if marriage_date == death_date_formatted:
-            err = "ERROR: US04: Marriage date cannot be equal to death date"
+            err = "ERROR: US05: Marriage date cannot be equal to death date"
             print(err)
             return err
 
@@ -377,6 +425,214 @@ def check_birth_after_parent_marriage(families, individuals):
                 + ".")
             is_valid = False
     return is_valid
+    
+#Story US09:
+def birth_after_parent_death(parentA, parentB, child):
+    #Birth after parents death 
+    if(parentA == '-' or parentB == '-' or child == '-'):
+        return None
+    parentADeath = collect_individual_metadata(parentA,"DEAT")
+    parentBDeath = collect_individual_metadata(parentB,"DEAT")
+    childBirth = collect_individual_metadata(child,"BIRT")
+    if (childBirth > parentADeath or childBirth > parentBDeath):
+        print("ERROR: US09: Child born after death of parent")
+        return True
+    else:
+        return False
+
+#Story US10:
+def married_before_fourteen(marriage_year, birth_year):
+    # Marriage before age of 14
+    if (marriage_year == '-' or birth_year == '-'):
+        return None
+    ageAtMarriage = marriage_year-birth_year
+    if marriage_year:
+        if ageAtMarriage <= 14:
+            err = "ERROR: US10: Marriage date is before 14"
+            print(err)
+            return True
+    return False
+
+#Story US11
+def noBigamy(families, individuals):
+    err = None
+    husb_ID = ""
+    wife_ID = ""
+    myDict = {}
+    divDict = {}
+    for id in families:
+        for item in families[id]:
+            if item[0] == "HUSB":
+                husb_ID = item[1]
+                myDict.setdefault(husb_ID)
+                divDict.setdefault(husb_ID)
+            elif item[0] == "WIFE":
+                wife_ID = item[1]
+                myDict.setdefault(wife_ID)
+                divDict.setdefault(wife_ID)
+
+    for key, values in myDict.items():
+        for id in families:
+            fam_husbId = get_family_data_by_key(families, id, 'HUSB')
+            fam_wifeId = get_family_data_by_key(families, id, 'WIFE')
+            
+            if key == fam_husbId or key == fam_wifeId:
+                marr_date = get_marriage_date_by_key(families, id, key)
+
+                if key in myDict:
+                    if isinstance(myDict[key], list):
+                        myDict[key].append(marr_date)
+                    else:
+                        myDict[key] = [myDict[key], marr_date]
+                else:
+                    myDict[key] = [marr_date]
+    
+    for key, values in divDict.items():
+        for id in families:
+            fam_husbId = get_family_data_by_key(families, id, 'HUSB')
+            fam_wifeId = get_family_data_by_key(families, id, 'WIFE')
+            if key == fam_husbId or key == fam_wifeId:
+                div_date = get_div_date_by_key(families, id, key)
+                
+                if key in divDict:
+                    if isinstance(divDict[key], list):
+                        divDict[key].append(div_date)
+                    else:
+                        divDict[key] = [divDict[key], div_date]
+                else:
+                    divDict[key] = [div_date]
+                 
+    updated_myDict = {key: [val for val in value if val is not None] for key, value in myDict.items()}
+    updated_divDict = {key: [val for val in value if val is not None] for key, value in divDict.items()}
+
+    for key in myDict:
+        if key in divDict:
+            my_dates = [date for sublist in myDict[key] if sublist for date in sublist] 
+            div_dates = [date for sublist in divDict[key] if sublist for date in sublist]
+            new_my_dates = [datetime.datetime.strptime(date, '%d %b %Y').date() for date in my_dates]
+            new_div_dates = [datetime.datetime.strptime(date, '%d %b %Y').date() for date in div_dates]
+            
+            if len(new_my_dates) > 2 and len(new_div_dates) > 1:
+                for i in range(len(new_my_dates) - 1):
+                    if new_div_dates[i] > new_my_dates[i] and new_div_dates[i] < new_my_dates[i+1]:
+                        err = "No Bigamy"
+
+                    else:
+                        err = "Bigamy caught"
+                    return(err)
+            
+            elif (len(new_my_dates) == 2 and (len(new_div_dates) == 1 or len(new_div_dates) == 0)):
+                if len(new_div_dates) == 0:
+                    err = "Bigamy caught"
+            
+                else:
+                    lesser_date = min(new_my_dates)
+                    greater_date = max(new_my_dates)
+                    div_date = new_div_dates[0]
+            
+                    if lesser_date < div_date < greater_date:
+                        err = "No Bigamy"
+
+                    else:
+                        err = "Bigamy caught"
+                return err
+    
+            else:
+                err = "No Bigamy"
+    return err
+
+
+# Story Id: US18
+def sibling_should_not_marry(families):
+    invalid = False
+    husb_wives = get_all_husband_and_wives(families)
+    for family_id, family_data in families.items():
+        sibling_ids = get_all_individual_data_by_key(families, family_id, 'CHIL')
+        for hub_id, wife_id in husb_wives:
+            if (hub_id in sibling_ids) and (wife_id in sibling_ids):
+                invalid = True
+                print(f"ERROR: US18: Siblings {hub_id} and {wife_id} should not marry.")
+    return invalid
+
+# Story Id: US14 (No more than five siblings should be born at the same time)
+def too_many_siblings_at_same_time(individuals, families):
+    invalid = False
+    for ind_id in individuals:
+        children_ids = get_all_data_of_a_person(families, ind_id, 'CHIL')
+        same_date_count = {}
+        for child_id in children_ids:
+            birth_date = get_individual_data_by_key(individuals, child_id, 'DATE')
+            if birth_date in same_date_count:
+                same_date_count[birth_date] += 1
+            else:
+                same_date_count[birth_date] = 0
+
+        for sibling_on_same_time_count in same_date_count.values():
+            if sibling_on_same_time_count > 5:
+                print(f"ERROR: US14: No more than five siblings should be born at the same time")
+                invalid = True
+    return invalid
+
+# Story Id: US12 (Mother should be less than 60 years older than her children)
+def mother_is_not_too_old_for_child(individuals, families):
+    invalid = False
+    for ind_id in individuals:
+        gender = get_individual_data_by_key(individuals, ind_id, 'SEX')
+        if gender == 'F':
+            mother_birth_date = get_individual_data_by_key(individuals, ind_id, 'DATE')
+            children_ids = get_all_data_of_a_person(families, ind_id, 'CHIL')
+            for child_id in children_ids:
+                child_birth_date = get_individual_data_by_key(individuals, child_id, 'DATE')
+                delta_years = relativedelta(
+                    datetime.datetime.strptime(child_birth_date, '%d %b %Y').date(),
+                    datetime.datetime.strptime(mother_birth_date, '%d %b %Y').date()
+                ).years
+                if delta_years >= 60:
+                    invalid = True
+                    print(f"ERROR: US12: Mother should be less than 60 years older than her children")
+
+    return invalid
+
+# Story Id: US15
+def fewer_than_15_siblings(families):
+    invalid = False
+    for family_id, family_data in families.items():
+        siblings = get_all_individual_data_by_key(families, family_id, 'CHIL')
+        if len(siblings) > 15:
+            invalid = True
+            print(f"ERROR: US15: Family has more than 15 siblings")
+    return invalid
+
+# Story Id: US17
+def parents_should_not_marry_descendants(individuals, families):
+    invalid = False
+    for ind_id in individuals:
+        children_ids = get_all_data_of_a_person(families, ind_id, 'CHIL')
+        for child_id in children_ids:
+            for family_id in families:
+                husb_id = get_family_data_by_key(families, family_id, 'HUSB')
+                wife_id = get_family_data_by_key(families, family_id, 'WIFE')
+
+                if ((ind_id == husb_id) and (child_id == wife_id) or (ind_id == wife_id) and (child_id == husb_id)):
+                    invalid = True
+                    print(f"ERROR: US17: Parent is married to their descendant")
+    return invalid
+
+# Story Id: US25
+def child_should_not_have_same_name_date(individuals, families):
+    invalid = False
+    for ind_id in individuals:
+        children_ids = get_all_data_of_a_person(families, ind_id, 'CHIL')
+        s = {}
+        for child_id in children_ids:
+            child_name = get_individual_data_by_key(individuals, child_id, 'NAME')
+            child_birth_date = get_individual_data_by_key(individuals, child_id, 'DATE')
+            if f'{child_name}_{child_birth_date}' in s:
+                invalid = True
+                print(f"ERROR: US25: Two child have same name and birth date")
+            else:
+                s[f'{child_name}_{child_birth_date}'] = True
+    return invalid
 
 #US07
 def check_age(birth_date):
@@ -468,10 +724,16 @@ def parse_gedcom_file(file_name):
         'TRLR': '0', 'NOTE': '0'
     }
     clean_tags = clean_gedcom_tags(file_name, supported_tags)
-    # clean_tags = clean_gedcom_tags('sample.ged', supported_tags)
     collect_individual_metadata(individuals, clean_tags)
     collect_family_metadata(individuals, families, clean_tags)
+    sibling_should_not_marry(families)
+    fewer_than_15_siblings(families)
+    too_many_siblings_at_same_time(individuals, families)
+    mother_is_not_too_old_for_child(individuals, families)
+    parents_should_not_marry_descendants(individuals, families)
+    child_should_not_have_same_name_date(individuals, families)
     return individuals, families
-
+  
 if __name__ == "__main__":
     parse_gedcom_file('sample.ged')
+
