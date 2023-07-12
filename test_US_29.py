@@ -78,7 +78,7 @@ class MyTestCase(unittest.TestCase):
         }
 
         expected_deceased = ['10 Mar 2022', '20 Jul 2021']
-        result = list_deceased(individuals)
+        result = parse.list_deceased(individuals)
         self.assertEqual(result, expected_deceased)
         print('US29 Test Case 6 Passed: Multiple deceased dates')
 
@@ -92,7 +92,7 @@ class MyTestCase(unittest.TestCase):
         }
 
         expected_deceased = []
-        result = list_deceased(individuals)
+        result = parse.list_deceased(individuals)
         self.assertEqual(result, expected_deceased)
         print('US29 Test Case 7 Passed: No deceased dates')
 
