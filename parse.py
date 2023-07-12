@@ -618,6 +618,62 @@ def child_should_not_have_same_name_date(individuals, families):
                 s[f'{child_name}_{child_birth_date}'] = True
     return invalid
 
+# Story Id: US13
+def birth_dates_of_siblings_should_be_more_than_eight_months_apart(individuals, families):
+    flag = False
+    for family_id, family_data in families.items():
+        siblings = get_all_individual_data_by_key(families, family_id, 'CHIL')
+        s = []
+        for sib_id in siblings:
+            sibling_birth_date = get_individual_data_by_key(individuals, sib_id, 'DATE')
+            s.append(sibling_birth_date)
+        
+        for i in range(1, len(s)):
+            date1 = datetime.datetime.strptime(s[i], "%d %b %Y")
+            date2 = datetime.datetime.strptime(s[i-1], "%d %b %Y")
+    
+            # difference = date1 - date2        Author: Sarthak Vaidya   Assignment 6 Bad Smell 1  
+            # months_difference = difference.days // 30 
+            months_difference = (date1.year - date2.year) * 12 + (date1.month - date2.month) #Assignment 6 bad smell 1 corrected using better logic
+    
+            if months_difference > 8:
+                flag = True
+                print(f"The difference between {s[i-1]} and {s[i]} is greater than 8 months.")
+            elif months_difference <= 8:
+                flag = False
+    return flag
+
+# Story Id: US29
+# def list_deceased(individuals):    Author: Sarthak Vaidya //Bad Smell 2 Assignment 6  
+#     deceased = []
+#     for indi_id, indi_data in individuals.items():
+#         if(len(indi_data) > 3):
+#             if(indi_data[3][0] == 'DEAT'):
+#                 deceased.append(indi_data[3][1])
+    
+#     for i in range(len(deceased)):
+#         print("Dates of deceased people")
+#         print(deceased[i])
+#     return deceased
+
+def list_deceased(individuals):    #Refactored code removing the bad smell
+    deceased = get_deceased_dates(individuals)
+    print_deceased_dates(deceased)
+    return deceased
+
+def get_deceased_dates(individuals):
+    deceased = []
+    for indi_id, indi_data in individuals.items():
+        if len(indi_data) > 3 and indi_data[3][0] == 'DEAT':
+            deceased.append(indi_data[3][1])
+    return deceased
+
+def print_deceased_dates(deceased_dates):
+    for date in deceased_dates:
+        print("Dates of deceased people")
+        print(date)
+
+
 def parse_gedcom_file(file_name):
     individuals = {}
     families = {}
@@ -636,6 +692,8 @@ def parse_gedcom_file(file_name):
     mother_is_not_too_old_for_child(individuals, families)
     parents_should_not_marry_descendants(individuals, families)
     child_should_not_have_same_name_date(individuals, families)
+    birth_dates_of_siblings_should_be_more_than_eight_months_apart(individuals, families)
+    list_deceased(individuals)
     return individuals, families
 
 parse_gedcom_file('sample_new.ged')
