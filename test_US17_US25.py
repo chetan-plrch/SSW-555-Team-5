@@ -58,7 +58,7 @@ class MyTestCase(unittest.TestCase):
         print('US25 Test Case #4 - Passed: Child does have same name and date of birth')
 
     def test_US25_5(self):
-        self.assertEqual(parse.child_should_not_have_same_name_date(individuals5, families5), False)
+        self.assertEqual(parse.child_should_not_have_same_name_date(individuals5, families5), True)
         print('US25 Test Case #5 - Passed: Child does not have same name and date of birth')
 
 
