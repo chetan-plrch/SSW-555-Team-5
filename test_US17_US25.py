@@ -21,44 +21,44 @@ families5 = {'F1': [('HUSB', 'I3'), ('WIFE', 'I14'), ('CHIL', 'I1'), ('CHIL', 'I
 class MyTestCase(unittest.TestCase):
     # US17: Parent is married to their descendant
     def test_US17_1(self):
-        self.assertEqual(parse.parents_should_not_marry_descendants(individuals, families), True)
+        self.assertEqual(parse.user_story_17(individuals, families), True)
         print('US17 Test Case #1 - Passed: Parent is married to their child')
 
     def test_US17_2(self):
-        self.assertEqual(parse.parents_should_not_marry_descendants(individuals2, families2), True)
+        self.assertEqual(parse.user_story_17(individuals2, families2), True)
         print('US17 Test Case #1 - Passed: Parent is married to their grand child')
 
     def test_US17_3(self):
-        self.assertEqual(parse.parents_should_not_marry_descendants(individuals3, families3), True)
+        self.assertEqual(parse.user_story_17(individuals3, families3), True)
         print('US17 Test Case #1 - Passed: Parent is married to great grand child')
 
     def test_US17_4(self):
-        self.assertEqual(parse.parents_should_not_marry_descendants(individuals4, families4), True)
+        self.assertEqual(parse.user_story_17(individuals4, families4), True)
         print('US17 Test Case #1 - Passed: Parent is married to great great grand child')
 
     def test_US17_5(self):
-        self.assertEqual(parse.parents_should_not_marry_descendants(individuals5, families5), False)
+        self.assertEqual(parse.user_story_17(individuals5, families5), False)
         print('US17 Test Case #1 - Passed: Parent is not married their child')
 
     # US25: Child should not have same name and date of birth
     def test_US25_1(self):
-        self.assertEqual(parse.child_should_not_have_same_name_date(individuals, families), False)
+        self.assertEqual(parse.user_story_25(individuals, families), False)
         print('US25 Test Case #1 - Passed: Child does not have same name and date of birth')
 
     def test_US25_2(self):
-        self.assertEqual(parse.child_should_not_have_same_name_date(individuals2, families2), False)
+        self.assertEqual(parse.user_story_25(individuals2, families2), False)
         print('US25 Test Case #2 - Passed: Child does not have same name and date of birth')
 
     def test_US25_3(self):
-        self.assertEqual(parse.child_should_not_have_same_name_date(individuals3, families3), False)
+        self.assertEqual(parse.user_story_25(individuals3, families3), False)
         print('US25 Test Case #3 - Passed: Child does have same name and date of birth')
 
     def test_US25_4(self):
-        self.assertEqual(parse.child_should_not_have_same_name_date(individuals4, families4), False)
+        self.assertEqual(parse.user_story_25(individuals4, families4), False)
         print('US25 Test Case #4 - Passed: Child does have same name and date of birth')
 
     def test_US25_5(self):
-        self.assertEqual(parse.child_should_not_have_same_name_date(individuals5, families5), False)
+        self.assertEqual(parse.user_story_25(individuals5, families5), False)
         print('US25 Test Case #5 - Passed: Child does not have same name and date of birth')
 
 

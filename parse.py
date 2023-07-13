@@ -628,29 +628,29 @@ def fewer_than_15_siblings(families):
     return invalid
 
 # Story Id: US17
-def parents_should_not_marry_descendants(individuals, families):
+def user_story_17(individuals, families):
     invalid = False
     all_descendants = get_all_descendants_of_all(individuals, families)
-    for ind_id in individuals:
-        descendants = all_descendants[ind_id]
+    for k in individuals:
+        descendants = all_descendants[k]
         for family_id in families:
             husb_id = get_family_data_by_key(families, family_id, 'HUSB')
             wife_id = get_family_data_by_key(families, family_id, 'WIFE')
 
-            if ((ind_id == husb_id) and (wife_id in descendants) or (ind_id == wife_id) and (husb_id in descendants)):
+            if ((k == husb_id) and (wife_id in descendants) or (k == wife_id) and (husb_id in descendants)):
                 invalid = True
                 print(f"ERROR: US17: Parent is married to their descendant")
     return invalid
-    
+
 # Story Id: US25
-def child_should_not_have_same_name_date(individuals, families):
+def user_story_25(individuals, families):
     invalid = False
-    for ind_id in individuals:
-        children_ids = get_all_data_of_a_person(families, ind_id, 'CHIL')
+    for k in individuals:
+        children_ids = get_all_data_of_a_person(families, k, 'CHIL')
         s = {}
-        for child_id in children_ids:
-            child_name = get_individual_data_by_key(individuals, child_id, 'NAME')
-            child_birth_date = get_individual_data_by_key(individuals, child_id, 'DATE')
+        for c in children_ids:
+            child_name = get_individual_data_by_key(individuals, c, 'NAME')
+            child_birth_date = get_individual_data_by_key(individuals, c, 'DATE')
             if f'{child_name}_{child_birth_date}' in s:
                 invalid = True
                 print(f"ERROR: US25: Two child have same name and birth date")
@@ -667,15 +667,15 @@ def birth_dates_of_siblings_should_be_more_than_eight_months_apart(individuals, 
         for sib_id in siblings:
             sibling_birth_date = get_individual_data_by_key(individuals, sib_id, 'DATE')
             s.append(sibling_birth_date)
-        
+
         for i in range(1, len(s)):
             date1 = datetime.datetime.strptime(s[i], "%d %b %Y")
             date2 = datetime.datetime.strptime(s[i-1], "%d %b %Y")
-            
-            # difference = date1 - date2        #Author: Sarthak Vaidya   Assignment 6 Bad Smell 1  
-            # months_difference = difference.days // 30 
+
+            # difference = date1 - date2        #Author: Sarthak Vaidya   Assignment 6 Bad Smell 1
+            # months_difference = difference.days // 30
             months_difference = (date1.year - date2.year) * 12 + (date1.month - date2.month) #Assignment 6 bad smell 1 corrected using better logic
-    
+
             if months_difference > 8:
                 flag = True
                 print(f"The difference between {s[i-1]} and {s[i]} is greater than 8 months.")
@@ -684,13 +684,13 @@ def birth_dates_of_siblings_should_be_more_than_eight_months_apart(individuals, 
     return flag
 
 # Story Id: US29
-# def list_deceased(individuals):    #Author: Sarthak Vaidya Bad Smell 2 Assignment 6  
+# def list_deceased(individuals):    #Author: Sarthak Vaidya Bad Smell 2 Assignment 6
 #     deceased = []
 #     for indi_id, indi_data in individuals.items():
 #         if(len(indi_data) > 3):
 #             if(indi_data[3][0] == 'DEAT'):
 #                 deceased.append(indi_data[3][1])
-    
+
 #     for i in range(len(deceased)):
 #         print("Dates of deceased people")
 #         print(deceased[i])
@@ -740,9 +740,9 @@ def unique_id(individuals, families):
                     return False
             y = y + 1
         x = x + 1
-        y = x +1    
+        y = x +1
     return True
-    
+
 # Story Id - US23:
 def unique_name_and_birth(individuals):
     if(individuals == '-'):
@@ -763,9 +763,9 @@ def unique_name_and_birth(individuals):
             j = j + 1
         i = i + 1
         j = i + 1
-        
+
     return True
-    
+
 def parse_gedcom_file(file_name):
     individuals = {}
     families = {}
@@ -782,8 +782,8 @@ def parse_gedcom_file(file_name):
     fewer_than_15_siblings(families)
     too_many_siblings_at_same_time(individuals, families)
     mother_is_not_too_old_for_child(individuals, families)
-    parents_should_not_marry_descendants(individuals, families)
-    child_should_not_have_same_name_date(individuals, families)
+    user_story_17(individuals, families)
+    user_story_25(individuals, families)
     birth_dates_of_siblings_should_be_more_than_eight_months_apart(individuals, families)
     list_deceased(individuals)
     return individuals, families
