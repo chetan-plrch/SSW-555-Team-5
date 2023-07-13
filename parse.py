@@ -21,6 +21,34 @@ def get_all_data_of_a_person(families, person_id, key):
 
     return child_ids
 
+def get_all_descendants_of_all(individuals, families):
+    d = {}
+    for ind_id in individuals:
+        d[ind_id] = get_all_descendants_of_a_person(families, ind_id, 'CHIL', set())
+
+    for ind_id in individuals.keys():
+        childs = d[ind_id]
+        for child_id in childs:
+            childs = childs + d[child_id]
+
+        d[ind_id] = childs
+    return d
+
+def get_all_descendants_of_a_person(families, person_id, key, child_ids = set()):
+    family_ids = set()
+
+    for id in families:
+        for meta in families[id]:
+            if ((meta[0] == 'WIFE') or (meta[0] == 'HUSB')) and (meta[1] == person_id):
+                family_ids.add(id)
+
+    for id in list(family_ids):
+        for meta in families[id]:
+            if meta[0] == key:
+                child_ids.add(meta[1])
+
+    return list(child_ids)
+
 def get_from_all_records_all_family_data(families, key):
     meta_data = []
     for id in families:
@@ -331,7 +359,6 @@ def check_divorce_before_death(families, individuals):
     for id in families:
         if "DIV" in families[id]:
             div_date = datetime.datetime.strptime(families[id]["DIV"], "%d %b %Y")
-            print(div_date)
             husb_ID = families[id]["HUSB"]
             wife_ID = families[id]["WIFE"]
             if "DEAT" in individuals[husb_ID] and "DEAT" in individuals[wife_ID]:
@@ -403,7 +430,6 @@ def check_birth_after_parent_marriage(families, individuals):
                             + ".")
                     is_valid = False
         else:
-            print(families[id])
             print("ERROR: FILE: US08: Marriage date not set or properly formatted of family: "
                 + id
                 + ".")
@@ -415,9 +441,23 @@ def birth_after_parent_death(parentA, parentB, child):
     #Birth after parents death 
     if(parentA == '-' or parentB == '-' or child == '-'):
         return None
-    parentADeath = collect_individual_metadata(parentA,"DEAT")
-    parentBDeath = collect_individual_metadata(parentB,"DEAT")
-    childBirth = collect_individual_metadata(child,"BIRT")
+    childBirth= datetime.datetime(2, 2, 2).date()
+    parentADeath= datetime.datetime(9999, 1, 1).date()
+    parentBDeath= datetime.datetime(9999, 1, 1).date()
+    is_dead = False
+    childBirth = datetime.datetime.strptime(child['DATE'], "%d %b %Y").date()
+    for id in parentA:  
+        if id == "DEAT":
+            is_dead = True
+            parentADeath = temp
+        if id == "DATE":
+            temp = datetime.datetime.strptime(parentA[id], "%d %b %Y").date()
+    for id in parentB:  
+        if id == "DEAT":
+            is_dead = True
+            parentBDeath = temp
+        if id == "DATE":
+            temp = datetime.datetime.strptime(parentB[id], "%d %b %Y").date()
     if (childBirth > parentADeath or childBirth > parentBDeath):
         print("ERROR: US09: Child born after death of parent")
         return True
@@ -590,18 +630,18 @@ def fewer_than_15_siblings(families):
 # Story Id: US17
 def parents_should_not_marry_descendants(individuals, families):
     invalid = False
+    all_descendants = get_all_descendants_of_all(individuals, families)
     for ind_id in individuals:
-        children_ids = get_all_data_of_a_person(families, ind_id, 'CHIL')
-        for child_id in children_ids:
-            for family_id in families:
-                husb_id = get_family_data_by_key(families, family_id, 'HUSB')
-                wife_id = get_family_data_by_key(families, family_id, 'WIFE')
+        descendants = all_descendants[ind_id]
+        for family_id in families:
+            husb_id = get_family_data_by_key(families, family_id, 'HUSB')
+            wife_id = get_family_data_by_key(families, family_id, 'WIFE')
 
-                if ((ind_id == husb_id) and (child_id == wife_id) or (ind_id == wife_id) and (child_id == husb_id)):
-                    invalid = True
-                    print(f"ERROR: US17: Parent is married to their descendant")
+            if ((ind_id == husb_id) and (wife_id in descendants) or (ind_id == wife_id) and (husb_id in descendants)):
+                invalid = True
+                print(f"ERROR: US17: Parent is married to their descendant")
     return invalid
-
+    
 # Story Id: US25
 def child_should_not_have_same_name_date(individuals, families):
     invalid = False
@@ -673,7 +713,59 @@ def print_deceased_dates(deceased_dates):
         print("Dates of deceased people")
         print(date)
 
-
+# Story Id - US22:
+def unique_id(individuals, families):
+    if(individuals == '-' or families == '-'):
+        return None
+    i = 0
+    j = 0
+    for ind in individuals:
+        for ind2 in individuals:
+            if(j >= len(individuals)):
+                continue
+            elif(i < j):
+                 if(ind == ind2):
+                     return False
+            j = j + 1
+        i = i + 1
+        j = i + 1
+    x = 0
+    y = 0
+    for fam in families:
+        for fam2 in families:
+            if(y >= len(families)):
+                continue
+            elif(x < y):
+                if(fam == fam2):
+                    return False
+            y = y + 1
+        x = x + 1
+        y = x +1    
+    return True
+    
+# Story Id - US23:
+def unique_name_and_birth(individuals):
+    if(individuals == '-'):
+        return None;
+    i = 0
+    j = 0
+    for ind in individuals:
+        ind_name = get_individual_data_by_key(individuals, ind, 'NAME')
+        ind_birth = get_individual_data_by_key(individuals, ind, 'DATE')
+        for ind2 in individuals:
+            ind2_name = get_individual_data_by_key(individuals, ind2, 'NAME')
+            ind2_birth = get_individual_data_by_key(individuals, ind2, 'DATE')
+            if(j >= len(individuals)):
+                continue
+            elif(i < j and ind_name != None):
+                 if(ind_name == ind2_name and ind_birth == ind2_birth):
+                     return False
+            j = j + 1
+        i = i + 1
+        j = i + 1
+        
+    return True
+    
 def parse_gedcom_file(file_name):
     individuals = {}
     families = {}

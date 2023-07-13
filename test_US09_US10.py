@@ -6,7 +6,6 @@ class MyTestCase(unittest.TestCase):
     # US09: Birth After Death of Parents
     def test_US09_1(case):
         parentB = {
-            "@I3@": {
             "NAME": "Christopher /Li/",
             "SEX": "M",
             "BIRT": "",
@@ -14,21 +13,19 @@ class MyTestCase(unittest.TestCase):
             "DEAT": "",
             "DATE": "16 JUL 2010",
             "FAMC": "@F1@"
-        }}
+        }
         child = {
-            "@I3@": {
             "NAME": "Jenn",
             "SEX": "F",
             "BIRT": "",
             "DATE": "5 JAN 1998",
             "FAMC": "@F1@"
-        }}
+        }
         case.assertIsNone(parse.birth_after_parent_death('-', parentB, child))
         print('Missing parentA')
 
     def test_US09_2(case):
         parentA = {
-            "@I3@": {
             "NAME": "Natalie /Li/",
             "SEX": "F",
             "BIRT": "",
@@ -36,9 +33,8 @@ class MyTestCase(unittest.TestCase):
             "DEAT": "",
             "DATE": "30 MAR 2020",
             "FAMC": "@F1@"
-        }}
-        parentB = {
-            "@I3@": {
+        }
+        parentB = {    
             "NAME": "Christopher /Li/",
             "SEX": "M",
             "BIRT": "",
@@ -46,13 +42,12 @@ class MyTestCase(unittest.TestCase):
             "DEAT": "",
             "DATE": "16 JUL 2010",
             "FAMC": "@F1@"
-        }}
+        }
         case.assertIsNone(parse.birth_after_parent_death(parentA, parentB, '-'))
         print('Missing child')
 
     def test_US09_3(case):
         parentA = {
-            "@I3@": {
             "NAME": "Natalie /Li/",
             "SEX": "F",
             "BIRT": "",
@@ -60,9 +55,8 @@ class MyTestCase(unittest.TestCase):
             "DEAT": "",
             "DATE": "30 MAR 2020",
             "FAMC": "@F1@"
-        }}
+        }
         parentB = {
-            "@I3@": {
             "NAME": "Christopher /Li/",
             "SEX": "M",
             "BIRT": "",
@@ -70,21 +64,19 @@ class MyTestCase(unittest.TestCase):
             "DEAT": "",
             "DATE": "16 JUL 2010",
             "FAMC": "@F1@"
-        }}
+        }
         child = {
-            "@I3@": {
             "NAME": "Jenn",
             "SEX": "F",
             "BIRT": "",
             "DATE": "5 JAN 1998",
             "FAMC": "@F1@"
-        }}
+        }
         case.assertEqual(parse.birth_after_parent_death(parentA, parentB, child), False)
         print('Birth before death of a parent')
 
     def test_US09_4(case):
         parentA = {
-            "@I3@": {
             "NAME": "Natalie /Li/",
             "SEX": "F",
             "BIRT": "",
@@ -92,9 +84,8 @@ class MyTestCase(unittest.TestCase):
             "DEAT": "",
             "DATE": "30 MAR 1997",
             "FAMC": "@F1@"
-        }}
+        }
         parentB = {
-            "@I3@": {
             "NAME": "Christopher /Li/",
             "SEX": "M",
             "BIRT": "",
@@ -102,21 +93,19 @@ class MyTestCase(unittest.TestCase):
             "DEAT": "",
             "DATE": "16 JUL 2010",
             "FAMC": "@F1@"
-        }}
-        child = {
-            "@I3@": {
+        }
+        child = {   
             "NAME": "Jenn",
             "SEX": "F",
             "BIRT": "",
             "DATE": "5 JAN 1998",
             "FAMC": "@F1@"
-        }}
+        }
         case.assertEqual(parse.birth_after_parent_death(parentA, parentB, child), True)
         print('Birth after death of a parent')
 
     def test_US09_5(case):
         parentA = {
-            "@I3@": {
             "NAME": "Natalie /Li/",
             "SEX": "F",
             "BIRT": "",
@@ -124,9 +113,8 @@ class MyTestCase(unittest.TestCase):
             "DEAT": "",
             "DATE": "30 MAR 2020",
             "FAMC": "@F1@"
-        }}
-        parentB = {
-            "@I3@": {
+        }
+        parentB = {  
             "NAME": "Christopher /Li/",
             "SEX": "M",
             "BIRT": "",
@@ -134,15 +122,14 @@ class MyTestCase(unittest.TestCase):
             "DEAT": "",
             "DATE": "16 JUL 1996",
             "FAMC": "@F1@"
-        }}
+        }
         child = {
-            "@I3@": {
             "NAME": "Jenn",
             "SEX": "F",
             "BIRT": "",
             "DATE": "5 JAN 1998",
             "FAMC": "@F1@"
-        }}
+        }
         case.assertEqual(parse.birth_after_parent_death(parentA, parentB, child), True)
         print('Born after death of parent')
         
