@@ -29,3 +29,6 @@ jobs:
     - name: Run the main file
       run: |
         python3 parse.py
+    - name: Run the automated test
+      run: |
+        sh automate_test.sh
