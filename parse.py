@@ -644,7 +644,7 @@ def birth_dates_of_siblings_should_be_more_than_eight_months_apart(individuals, 
     return flag
 
 # Story Id: US29
-# def list_deceased(individuals):    Author: Sarthak Vaidya //Bad Smell 2 Assignment 6  
+# def list_deceased(individuals):    #Author: Sarthak Vaidya Bad Smell 2 Assignment 6  
 #     deceased = []
 #     for indi_id, indi_data in individuals.items():
 #         if(len(indi_data) > 3):
