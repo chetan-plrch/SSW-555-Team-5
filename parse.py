@@ -21,6 +21,34 @@ def get_all_data_of_a_person(families, person_id, key):
 
     return child_ids
 
+def get_all_descendants_of_all(individuals, families):
+    d = {}
+    for ind_id in individuals:
+        d[ind_id] = get_all_descendants_of_a_person(families, ind_id, 'CHIL', set())
+
+    for ind_id in individuals.keys():
+        childs = d[ind_id]
+        for child_id in childs:
+            childs = childs + d[child_id]
+
+        d[ind_id] = childs
+    return d
+
+def get_all_descendants_of_a_person(families, person_id, key, child_ids = set()):
+    family_ids = set()
+
+    for id in families:
+        for meta in families[id]:
+            if ((meta[0] == 'WIFE') or (meta[0] == 'HUSB')) and (meta[1] == person_id):
+                family_ids.add(id)
+
+    for id in list(family_ids):
+        for meta in families[id]:
+            if meta[0] == key:
+                child_ids.add(meta[1])
+
+    return list(child_ids)
+
 def get_from_all_records_all_family_data(families, key):
     meta_data = []
     for id in families:
@@ -331,7 +359,6 @@ def check_divorce_before_death(families, individuals):
     for id in families:
         if "DIV" in families[id]:
             div_date = datetime.datetime.strptime(families[id]["DIV"], "%d %b %Y")
-            print(div_date)
             husb_ID = families[id]["HUSB"]
             wife_ID = families[id]["WIFE"]
             if "DEAT" in individuals[husb_ID] and "DEAT" in individuals[wife_ID]:
@@ -403,7 +430,6 @@ def check_birth_after_parent_marriage(families, individuals):
                             + ".")
                     is_valid = False
         else:
-            print(families[id])
             print("ERROR: FILE: US08: Marriage date not set or properly formatted of family: "
                 + id
                 + ".")
@@ -604,16 +630,16 @@ def fewer_than_15_siblings(families):
 # Story Id: US17
 def parents_should_not_marry_descendants(individuals, families):
     invalid = False
+    all_descendants = get_all_descendants_of_all(individuals, families)
     for ind_id in individuals:
-        children_ids = get_all_data_of_a_person(families, ind_id, 'CHIL')
-        for child_id in children_ids:
-            for family_id in families:
-                husb_id = get_family_data_by_key(families, family_id, 'HUSB')
-                wife_id = get_family_data_by_key(families, family_id, 'WIFE')
+        descendants = all_descendants[ind_id]
+        for family_id in families:
+            husb_id = get_family_data_by_key(families, family_id, 'HUSB')
+            wife_id = get_family_data_by_key(families, family_id, 'WIFE')
 
-                if ((ind_id == husb_id) and (child_id == wife_id) or (ind_id == wife_id) and (child_id == husb_id)):
-                    invalid = True
-                    print(f"ERROR: US17: Parent is married to their descendant")
+            if ((ind_id == husb_id) and (wife_id in descendants) or (ind_id == wife_id) and (husb_id in descendants)):
+                invalid = True
+                print(f"ERROR: US17: Parent is married to their descendant")
     return invalid
     
 # Story Id: US25
