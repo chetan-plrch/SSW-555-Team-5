@@ -631,8 +631,8 @@ def birth_dates_of_siblings_should_be_more_than_eight_months_apart(individuals, 
         for i in range(1, len(s)):
             date1 = datetime.datetime.strptime(s[i], "%d %b %Y")
             date2 = datetime.datetime.strptime(s[i-1], "%d %b %Y")
-    
-            # difference = date1 - date2        Author: Sarthak Vaidya   Assignment 6 Bad Smell 1  
+            
+            # difference = date1 - date2        #Author: Sarthak Vaidya   Assignment 6 Bad Smell 1  
             # months_difference = difference.days // 30 
             months_difference = (date1.year - date2.year) * 12 + (date1.month - date2.month) #Assignment 6 bad smell 1 corrected using better logic
     
