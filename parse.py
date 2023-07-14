@@ -672,9 +672,9 @@ def birth_dates_of_siblings_should_be_more_than_eight_months_apart(individuals, 
             date1 = datetime.datetime.strptime(s[i], "%d %b %Y")
             date2 = datetime.datetime.strptime(s[i-1], "%d %b %Y")
             
-            difference = date1 - date2        #Author: Sarthak Vaidya   Assignment 6 Bad Smell 1  
-            months_difference = difference.days // 30 
-            # months_difference = (date1.year - date2.year) * 12 + (date1.month - date2.month) #Assignment 6 bad smell 1 corrected using better logic
+            # difference = date1 - date2        #Author: Sarthak Vaidya   Assignment 6 Bad Smell 1  
+            # months_difference = difference.days // 30 
+            months_difference = (date1.year - date2.year) * 12 + (date1.month - date2.month) #Assignment 6 bad smell 1 corrected using better logic
     
             if months_difference > 8:
                 flag = True
@@ -684,34 +684,34 @@ def birth_dates_of_siblings_should_be_more_than_eight_months_apart(individuals, 
     return flag
 
 # Story Id: US29
-def list_deceased(individuals):    #Author: Sarthak Vaidya Bad Smell 2 Assignment 6  
-    deceased = []
-    for indi_id, indi_data in individuals.items():
-        if(len(indi_data) > 3):
-            if(indi_data[3][0] == 'DEAT'):
-                deceased.append(indi_data[3][1])
-    
-    for i in range(len(deceased)):
-        print("Dates of deceased people")
-        print(deceased[i])
-    return deceased
-
-# def list_deceased(individuals):    #Refactored code removing the bad smell
-#     deceased = get_deceased_dates(individuals)
-#     print_deceased_dates(deceased)
-#     return deceased
-
-# def get_deceased_dates(individuals):
+# def list_deceased(individuals):    #Author: Sarthak Vaidya Bad Smell 2 Assignment 6  
 #     deceased = []
 #     for indi_id, indi_data in individuals.items():
-#         if len(indi_data) > 3 and indi_data[3][0] == 'DEAT':
-#             deceased.append(indi_data[3][1])
+#         if(len(indi_data) > 3):
+#             if(indi_data[3][0] == 'DEAT'):
+#                 deceased.append(indi_data[3][1])
+    
+#     for i in range(len(deceased)):
+#         print("Dates of deceased people")
+#         print(deceased[i])
 #     return deceased
 
-# def print_deceased_dates(deceased_dates):
-#     for date in deceased_dates:
-#         print("Dates of deceased people")
-#         print(date)
+def list_deceased(individuals):    #Refactored code removing the bad smell
+    deceased = get_deceased_dates(individuals)
+    print_deceased_dates(deceased)
+    return deceased
+
+def get_deceased_dates(individuals):
+    deceased = []
+    for indi_id, indi_data in individuals.items():
+        if len(indi_data) > 3 and indi_data[3][0] == 'DEAT':
+            deceased.append(indi_data[3][1])
+    return deceased
+
+def print_deceased_dates(deceased_dates):
+    for date in deceased_dates:
+        print("Dates of deceased people")
+        print(date)
 
 # Story Id - US22:
 def unique_id(individuals, families):
