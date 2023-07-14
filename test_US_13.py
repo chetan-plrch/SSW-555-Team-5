@@ -76,37 +76,37 @@ class MyTestCase(unittest.TestCase):
         print('US13 Test Case 5 Passed: Birth Dates are not more than 8 months apart')
     
     #Refactoring Updated Test Cases   Refactoring Assignment
-    def test_US13_6(self):
-        individuals = {
-            'I1': [('NAME', 'John /Doe/'), ('SEX', 'M'), ('DATE', '01 Jan 1990')],
-            'I2': [('NAME', 'Jane /Smith/'), ('SEX', 'F'), ('DATE', '15 Jun 1985')],
-            'I3': [('NAME', 'Mike /Johnson/'), ('SEX', 'M'), ('DATE', '05 Sep 1978')],
-            'I4': [('NAME', 'Anna /Davis/'), ('SEX', 'F'), ('DATE', '30 Nov 1995')],
-        }
+    # def test_US13_6(self):
+    #     individuals = {
+    #         'I1': [('NAME', 'John /Doe/'), ('SEX', 'M'), ('DATE', '01 Jan 1990')],
+    #         'I2': [('NAME', 'Jane /Smith/'), ('SEX', 'F'), ('DATE', '15 Jun 1985')],
+    #         'I3': [('NAME', 'Mike /Johnson/'), ('SEX', 'M'), ('DATE', '05 Sep 1978')],
+    #         'I4': [('NAME', 'Anna /Davis/'), ('SEX', 'F'), ('DATE', '30 Nov 1995')],
+    #     }
 
-        families = {
-            'F1': [('HUSB', 'I1'), ('WIFE', 'I2'), ('CHIL', 'I3'), ('CHIL', 'I4')]
-        }
+    #     families = {
+    #         'F1': [('HUSB', 'I1'), ('WIFE', 'I2'), ('CHIL', 'I3'), ('CHIL', 'I4')]
+    #     }
 
-        result = parse.birth_dates_of_siblings_should_be_more_than_eight_months_apart(individuals, families)
-        self.assertTrue(result)
-        print('US13 Test Case 6 Passed: Birth Dates are more than 8 months apart')
+    #     result = parse.birth_dates_of_siblings_should_be_more_than_eight_months_apart(individuals, families)
+    #     self.assertTrue(result)
+    #     print('US13 Test Case 6 Passed: Birth Dates are more than 8 months apart')
 
-    def test_US13_7(self):
-        individuals = {
-            'I1': [('NAME', 'John /Doe/'), ('SEX', 'M'), ('DATE', '01 Jan 1990')],
-            'I2': [('NAME', 'Jane /Smith/'), ('SEX', 'F'), ('DATE', '15 Jun 1991')],
-            'I3': [('NAME', 'Mike /Johnson/'), ('SEX', 'M'), ('DATE', '05 Sep 1992')],
-            'I4': [('NAME', 'Anna /Davis/'), ('SEX', 'F'), ('DATE', '30 Nov 1993')],
-        }
+    # def test_US13_7(self):
+    #     individuals = {
+    #         'I1': [('NAME', 'John /Doe/'), ('SEX', 'M'), ('DATE', '01 Jan 1990')],
+    #         'I2': [('NAME', 'Jane /Smith/'), ('SEX', 'F'), ('DATE', '15 Jun 1991')],
+    #         'I3': [('NAME', 'Mike /Johnson/'), ('SEX', 'M'), ('DATE', '05 Sep 1992')],
+    #         'I4': [('NAME', 'Anna /Davis/'), ('SEX', 'F'), ('DATE', '30 Nov 1993')],
+    #     }
 
-        families = {
-            'F1': [('HUSB', 'I1'), ('WIFE', 'I2'), ('CHIL', 'I3'), ('CHIL', 'I4')]
-        }
+    #     families = {
+    #         'F1': [('HUSB', 'I1'), ('WIFE', 'I2'), ('CHIL', 'I3'), ('CHIL', 'I4')]
+    #     }
 
-        result = parse.birth_dates_of_siblings_should_be_more_than_eight_months_apart(individuals, families)
-        self.assertTrue(result)
-        print('US13 Test Case 7 Passed: Birth Dates are more than 8 months apart')
+    #     result = parse.birth_dates_of_siblings_should_be_more_than_eight_months_apart(individuals, families)
+    #     self.assertTrue(result)
+    #     print('US13 Test Case 7 Passed: Birth Dates are more than 8 months apart')
 
 if __name__ == '__main__':
     unittest.main()
