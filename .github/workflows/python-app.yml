@@ -25,7 +25,10 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip3 install prettytable python-dateutil
-    - name: Run the main file
+        pip3 install prettytable python-dateutil pytest
+    - name: Run the main file (parse.py)
       run: |
         python3 parse.py
+    - name: Run the automated test (All files starting with test prefix - automate_test.sh)
+      run: |
+        sh automate_test.sh
