@@ -75,10 +75,21 @@ def get_individual_data_by_key(individuals, id, key):
     return meta_data
 
 def get_family_data_by_key(families, id, key):
-    meta_data = None
-    for meta in families[id]:
-        if meta[0] == key: meta_data = meta[1]
-    return meta_data
+    #print(families)
+    #return families[id][key]
+    #if key not in families[id][0]:
+    #    return False
+    #return families[id][0][key]
+    #meta_data = None
+    #for meta in families[id]:
+    #    if meta[0] == key: meta_data = meta[1]
+    #return meta_data
+    family_data_list = families[id]
+    for tuple in family_data_list:
+        if tuple[0] == key:
+            return tuple[1]
+    #if execution reaches here key was not found
+    return False
 
 def get_marriage_date_by_key(families, id, key):
     meta_data = []
@@ -257,6 +268,11 @@ def collect_family_metadata(individuals, families, clean_tags):
         # check_birth_after_parent_marriage(families,individuals) #US08
         noBigamy(families, individuals)
 
+        check_age_under_onefifty(individuals) #US07
+        check_gender_role(families, individuals) #US21
+        large_age_difference(families, individuals) #US34
+        recent_births(individuals) #US35
+
         y.add_row([key, married_date, divorce_date, husband_id, husband_name, wife_id, wife_name, children])
 
     print("Families")
@@ -420,11 +436,12 @@ def check_birth_after_parent_marriage(families, individuals):
         #if "MARR" in families[id]:
         if get_family_data_by_key(families,id,"MARR"):
             marriageDate = datetime.datetime.strptime(get_family_data_by_key(families,id,"MARR"), "%d %b %Y").date()
-            for childID in get_family_data_by_key(families,id,"CHIL"):
-                childBirthDate = datetime.datetime.strptime(get_family_data_by_key(families,id,"MARR"), "%d %b %Y").date()
+            childID = get_family_data_by_key(families,id,"CHIL")
+            if childID:
+                childBirthDate = datetime.datetime.strptime(get_individual_data_by_key(individuals,childID,"DATE"), "%d %b %Y").date()
                 if childBirthDate < marriageDate:
                     print("ANOMALY: FAMILY: US08: Child ("
-                            + get_individual_name(childID, individuals).replace("/", "")
+                            + childID
                             + ") born before marriage of parents in family: "
                             + id
                             + ".")
@@ -658,6 +675,88 @@ def child_should_not_have_same_name_date(individuals, families):
                 s[f'{child_name}_{child_birth_date}'] = True
     return invalid
 
+
+#US07
+def check_age(birth_date):
+    today = datetime.datetime.today()
+    birth = datetime.datetime.strptime(birth_date, "%d %b %Y")
+    age_from_today = today - birth
+    age = age_from_today.days
+    return age
+
+def check_age_under_onefifty(individuals):
+    is_valid = True
+    birth_date = 0
+    for id in individuals:
+        individual = individuals[id]
+        birthday = get_individual_data_by_key(individuals,id,"DATE")
+        day_age = check_age(birthday)
+        age = day_age/365.25
+        if age >= 150:
+            is_valid = False
+            print("Age is over 150")
+    return is_valid    
+
+#US21
+def check_gender_role(families, individuals):
+    is_valid = True
+    for id in families:
+        husbID = get_family_data_by_key(families,id,"HUSB")
+        if husbID:
+            gender = get_individual_data_by_key(individuals,husbID,"SEX")
+            if gender != "M":
+                print("Gender does not match Marriage Role")
+                is_valid = False
+        wifeID = get_family_data_by_key(families,id,"WIFE")
+        if wifeID:
+            gender = get_individual_data_by_key(individuals,wifeID,"SEX")
+            if gender != "F":
+                print("Gender does not match Marriage Role")
+                is_valid = False
+        return is_valid
+
+#US34
+def large_age_difference(families, individuals):
+    is_valid = True
+    for id in families:
+        husbID = get_family_data_by_key(families,id,"HUSB")
+        if husbID:
+            husb_bday = get_individual_data_by_key(individuals,husbID,"DATE")
+            husb_age1 = check_age(husb_bday)
+            husb_age = husb_age1/365.25
+            print(husb_age)
+        wifeID = get_family_data_by_key(families,id,"WIFE")
+        if wifeID:
+            wife_bday = get_individual_data_by_key(individuals,wifeID,"DATE")
+            wife_age1 = check_age(wife_bday)
+            wife_age = wife_age1/365.25
+            print(wife_age)
+        if husb_age > 2*wife_age:
+            print("Husband ", husbID, "is more than 2 times older than Wife ", wifeID)
+        elif wife_age >2*husb_age:
+            print("Wife ", wifeID, "is more than 2 times older than Husband ", husbID)
+        else:
+            print("Husband, ",husbID,"& Wife, ",wifeID,"do not have a large age gap")
+            is_valid = False
+        
+        return is_valid
+
+#US35
+def recent_births(individuals):
+    is_valid = True
+    for id in individuals:
+        individual = individuals[id]
+        birthday = get_individual_data_by_key(individuals,id,"DATE")
+        day_age = check_age(birthday)
+        if day_age > 30:
+            is_valid = False
+            print("Born more than 30 days ago")
+    return is_valid
+    print("Born Recently")
+
+
+
+
 # Story Id: US13
 def birth_dates_of_siblings_should_be_more_than_eight_months_apart(individuals, families):
     flag = False
@@ -765,7 +864,7 @@ def unique_name_and_birth(individuals):
         j = i + 1
         
     return True
-    
+
 def parse_gedcom_file(file_name):
     individuals = {}
     families = {}
@@ -787,5 +886,7 @@ def parse_gedcom_file(file_name):
     birth_dates_of_siblings_should_be_more_than_eight_months_apart(individuals, families)
     list_deceased(individuals)
     return individuals, families
+  
+if __name__ == "__main__":
+    parse_gedcom_file('sample.ged')
 
-parse_gedcom_file('sample_new.ged')
