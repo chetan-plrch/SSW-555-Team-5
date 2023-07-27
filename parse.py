@@ -865,6 +865,80 @@ def unique_name_and_birth(individuals):
         
     return True
 
+# Story Id - US16:
+def maleLastNames(families, individuals):
+    for family_id, family_data in families.items():
+        fam_husb_data = get_individual_data_by_key(families, family_id, "HUSB")
+        list_husb_name = get_individual_data_by_key(individuals, fam_husb_data, "NAME").split('/')[1].strip()
+        fam_child_data = []
+        fam_child_name = None
+        for i in range(0, len(family_data)):
+            if family_data[i][0] == "CHIL":
+                fam_child_data.append(family_data[i][1])
+        
+        for i in range(0, len(fam_child_data)):
+            child_id = fam_child_data[i].strip("'")
+            fam_child_gender = get_all_individual_data_by_key(individuals, child_id, "SEX")
+            if fam_child_gender[0] == "M":
+                fam_child_name = get_all_individual_data_by_key(individuals, child_id, "NAME")[0].split('/')[1].strip()
+            if fam_child_name is not None and list_husb_name != fam_child_name:
+                return False
+    return True
+
+# Story Id - US33:
+def listOrphans(families, individuals):
+    today = datetime.datetime.now().date()
+    is_orphan = None
+    fam_child_data = []
+    is_orphan_arr = []
+    orphan_name_list = []
+    for family_id, family_data in families.items():
+        for i in range(0, len(family_data)):
+            if family_data[i][0] == "CHIL":
+                fam_child_data.append(family_data[i][1])
+        
+        if len(fam_child_data) > 0:
+            for i in range(len(fam_child_data)):
+                child_id = fam_child_data[i].strip("'")
+                child_birth_date = get_all_individual_data_by_key(individuals, child_id, "DATE")[0]
+                child_name = get_all_individual_data_by_key(individuals, child_id, "NAME")
+                child_name = child_name[0].strip('/').replace('/', ' ')
+                today = today.strftime("%d %b %Y")
+                today = datetime.datetime.strptime(today, "%d %b %Y")
+                child_birth_date = datetime.datetime.strptime(child_birth_date, "%d %b %Y")
+                age = today - child_birth_date
+                years = age.days/365
+                years = round(years, 2)
+                
+                if years < 18:
+                    husband_id = get_individual_data_by_key(families, family_id, 'HUSB')
+                    husband_death_date = get_individual_data_by_key(individuals, husband_id, "DEAT")
+                    wife_id = get_individual_data_by_key(families, family_id, 'WIFE')
+                    wife_death_date = get_individual_data_by_key(individuals, wife_id, "DEAT")
+                    if husband_death_date is None or wife_death_date is None:
+                        is_orphan = False
+                        is_orphan_arr.append(is_orphan)
+                    else:
+                        is_orphan = True
+                        is_orphan_arr.append(is_orphan)
+                        orphan_name_list.append(child_name)
+
+                else:
+                    is_orphan = False
+                    is_orphan_arr.append(is_orphan)
+
+            fam_child_data.clear()
+        
+        else:
+            is_orphan_arr.append(is_orphan)
+    
+    if len(orphan_name_list) > 0:
+        print("Orphan Child List")
+        for i in range(len(orphan_name_list)):
+            print(orphan_name_list[i])
+    
+    return is_orphan_arr
+
 def parse_gedcom_file(file_name):
     individuals = {}
     families = {}
@@ -885,6 +959,8 @@ def parse_gedcom_file(file_name):
     child_should_not_have_same_name_date(individuals, families)
     birth_dates_of_siblings_should_be_more_than_eight_months_apart(individuals, families)
     list_deceased(individuals)
+    maleLastNames(families, individuals)
+    listOrphans(families, individuals)
     return individuals, families
   
 if __name__ == "__main__":
