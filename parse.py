@@ -939,6 +939,62 @@ def listOrphans(families, individuals):
     
     return is_orphan_arr
 
+# Story Id - US39:
+def upcomingAnniversaries(families, individuals):
+    today = datetime.datetime.now().date()
+    anniversary_list = []
+    for family_id, family_data in families.items():
+        husband_id = get_individual_data_by_key(families, family_id, 'HUSB')
+        husband_death_date = get_individual_data_by_key(individuals, husband_id, "DEAT")
+        wife_id = get_individual_data_by_key(families, family_id, 'WIFE')
+        wife_death_date = get_individual_data_by_key(individuals, wife_id, "DEAT")
+        anniversary_date = get_individual_data_by_key(families, family_id, "MARR")
+
+        if anniversary_date is not None and husband_death_date is None and wife_death_date is None:
+            anniversary_date = datetime.datetime.strptime(anniversary_date, "%d %b %Y")
+            today = today.strftime("%d %b %Y")
+            today = datetime.datetime.strptime(today, "%d %b %Y")
+
+            diffDate = anniversary_date.replace(year = today.year) - today
+            diffDays = diffDate.days
+        
+            if(diffDays >= 0 and diffDays <= 30):
+                anniversary_list.append(anniversary_date)
+        else:
+            return None
+    
+    print("Anniversary List")
+    for i in range(len(anniversary_list)):
+        print(anniversary_list[i])
+    return anniversary_list
+
+# Story Id - US38:
+def upcomingBirthdays(individuals):
+    today = datetime.datetime.now().date()
+    birthday_list = []
+    for indi_id, indi_data in individuals.items():
+        birth_date = get_individual_data_by_key(individuals, indi_id, 'DATE')
+        death_date = get_individual_data_by_key(individuals, indi_id, 'DEAT')
+
+        if birth_date is not None and death_date is None:
+            birth_date = datetime.datetime.strptime(birth_date, "%d %b %Y")
+            today = today.strftime("%d %b %Y")
+            today = datetime.datetime.strptime(today, "%d %b %Y")
+            diffDate = birth_date.replace(year = today.year) - today
+            diffDays = diffDate.days
+            if(diffDays >= 0 and diffDays <= 30):
+                birthday_list.append(birth_date)
+            else:
+                birthday_list.append(None)
+        else:
+            birthday_list.append(None)
+    
+    print("Birthday List")
+    for birthday in birthday_list:
+        if birthday is not None:
+            print(birthday)
+    return birthday_list
+
 def parse_gedcom_file(file_name):
     individuals = {}
     families = {}
@@ -961,6 +1017,8 @@ def parse_gedcom_file(file_name):
     list_deceased(individuals)
     maleLastNames(families, individuals)
     listOrphans(families, individuals)
+    upcomingAnniversaries(families, individuals)
+    upcomingBirthdays(individuals)
     return individuals, families
   
 if __name__ == "__main__":
