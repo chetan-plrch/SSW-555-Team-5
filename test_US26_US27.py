@@ -127,18 +127,18 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(parse.parse_gedcom_file('sample.ged'), parse.parse_gedcom_file('sample.ged'))
         print('US26 Test Case #1 - Passed: Individual and family records must be consistent w.r.t spouse and children')
 
-    def test_US26_1(self):
+    def test_US26_2(self):
         self.assertIsNot(parse.parse_gedcom_file('sample.ged'), None)
-        print('US26 Test Case #1 - Passed: Individual and family records must be consistent w.r.t spouse and children')
+        print('US26 Test Case #2 - Passed: Individual and family records must be consistent w.r.t spouse and children')
 
     # US27: Include person's current age when listing individuals
     def test_US27_1(self):
         self.assertEqual(parse.parse_gedcom_file('sample.ged'), parse.parse_gedcom_file('sample.ged'))
         print('US27 Test Case #1 - Passed: Include person\'s current age when listing individuals')
 
-    def test_US27_1(self):
+    def test_US27_2(self):
         self.assertIsNot(parse.parse_gedcom_file('sample.ged'), None)
-        print('US27 Test Case #1 - Passed: Include person\'s current age when listing individuals')
+        print('US27 Test Case #2 - Passed: Include person\'s current age when listing individuals')
 
 if __name__ == '__main__':
     unittest.main()
