@@ -270,7 +270,6 @@ def collect_family_metadata(individuals, families, clean_tags):
 
         check_age_under_onefifty(individuals) #US07
         check_gender_role(families, individuals) #US21
-        large_age_difference(families, individuals) #US34
         recent_births(individuals) #US35
 
         y.add_row([key, married_date, divorce_date, husband_id, husband_name, wife_id, wife_name, children])
@@ -719,18 +718,21 @@ def check_gender_role(families, individuals):
 def large_age_difference(families, individuals):
     is_valid = True
     for id in families:
+        
         husbID = get_family_data_by_key(families,id,"HUSB")
         if husbID:
             husb_bday = get_individual_data_by_key(individuals,husbID,"DATE")
             husb_age1 = check_age(husb_bday)
             husb_age = husb_age1/365.25
-            print(husb_age)
+            #print(husb_age)
+        
         wifeID = get_family_data_by_key(families,id,"WIFE")
         if wifeID:
             wife_bday = get_individual_data_by_key(individuals,wifeID,"DATE")
             wife_age1 = check_age(wife_bday)
             wife_age = wife_age1/365.25
-            print(wife_age)
+            #print(wife_age)
+            
         if husb_age > 2*wife_age:
             print("Husband ", husbID, "is more than 2 times older than Wife ", wifeID)
         elif wife_age >2*husb_age:
@@ -739,7 +741,7 @@ def large_age_difference(families, individuals):
             print("Husband, ",husbID,"& Wife, ",wifeID,"do not have a large age gap")
             is_valid = False
         
-        return is_valid
+    return is_valid
 
 #US35
 def recent_births(individuals):
@@ -750,7 +752,7 @@ def recent_births(individuals):
         day_age = check_age(birthday)
         if day_age > 30:
             is_valid = False
-            print("Born more than 30 days ago")
+            #print("Born more than 30 days ago")
     return is_valid
     print("Born Recently")
 
@@ -994,6 +996,118 @@ def upcomingBirthdays(individuals):
         if birthday is not None:
             print(birthday)
     return birthday_list
+=======
+#US36
+def recent_deaths(individuals):
+    is_recently_dead = True
+    for id in individuals:
+        deceaseddate = get_individual_data_by_key(individuals, id,"DEAT")
+        if deceaseddate != None: #If Deceased Date is not None
+            today = datetime.datetime.today()
+            death = datetime.datetime.strptime(deceaseddate, "%d %b %Y")
+            death_from_today = today - death
+            days_since_death = death_from_today.days
+            if days_since_death < 30:
+                print(id,"recently passed away")
+            else: #If Deceased Date is not greater than 30
+                is_recently_dead  = False
+        else: #If Deceased Date is None (Alive)
+            is_recently_dead = False
+    return is_recently_dead
+
+def is_deceased(individuals): #US 29 Alternative
+    is_deceased = True
+    for id in individuals:
+        deceaseddate = get_all_individual_data_by_key(individuals, id, "DEAT")
+        if deceaseddate == []:
+            #print("Individual ",id," is not deceased")
+            is_deceased = False
+        else:
+            print("Individual ",id," is deceased since", ''.join(deceaseddate))
+    return is_deceased
+
+def survivors(families,individuals):
+    is_survived_by = True
+    all_descendants = get_all_descendants_of_all(individuals,families)
+    for ind_id in individuals:
+        descendants = all_descendants[ind_id]
+        deceaseddate = get_individual_data_by_key(individuals, ind_id, "DEAT")
+        
+        if deceaseddate != None: #If Deceased Date is not None (Dead)
+            for family_id in families:
+                husbID = get_family_data_by_key(families, family_id,"HUSB")
+                wifeID = get_family_data_by_key(families, family_id,"WIFE")
+                #childID = get_family_data_by_key(families, family_id,"CHIL")
+                if ind_id == husbID:
+                    wifedeath = get_all_individual_data_by_key(individuals, wifeID, "DEAT")
+                    if wifedeath == []:
+                        print(ind_id, "Survived by Wife:", wifeID)
+                    for descendantID in descendants:
+                        deadchilddate = get_all_individual_data_by_key(individuals, descendantID, "DEAT")
+                        if deadchilddate == []:
+                            alivedescendant = []
+                            alivedescendant.append(descendantID)
+                            print(ind_id, "Survived by Child:",','.join(alivedescendant))
+                            if wifedeath != [] and deadchilddate != []:
+                                is_survived_by = False
+                elif ind_id == wifeID:
+                    husbdeath = get_all_individual_data_by_key(individuals, husbID, "DEAT")
+                    if husbdeath == []:
+                        print(ind_id, "Survived by Husband:", husbID)
+                    for descendantID in descendants:
+                        deadchilddate = get_all_individual_data_by_key(individuals, descendantID, "DEAT")
+                        if deadchilddate == []:
+                            alivedescendant = []
+                            alivedescendant.append(descendantID)
+                            print(ind_id, "Survived by Child:",','.join(alivedescendant))
+                            if husbdeath != [] and deadchilddate != []:
+                                is_survived_by = False
+    return is_survived_by
+    
+#US37
+def recent_survivors(families,individuals):
+    recently_grieving_family = True
+    all_descendants = get_all_descendants_of_all(individuals,families)
+    for ind_id in individuals:
+        deceaseddate = get_individual_data_by_key(individuals, ind_id,"DEAT")
+        if deceaseddate != None: #If Deceased Date is not None
+            today = datetime.datetime.today()
+            death = datetime.datetime.strptime(deceaseddate, "%d %b %Y")
+            death_from_today = today - death
+            days_since_death = death_from_today.days
+            if days_since_death < 30:
+                #print(ind_id,"recently passed away")
+                for family_id in families:
+                    descendants = all_descendants[ind_id]
+                    husbID = get_family_data_by_key(families, family_id,"HUSB")
+                    wifeID = get_family_data_by_key(families, family_id,"WIFE")
+                    #childID = get_family_data_by_key(families, family_id,"CHIL")
+                    if ind_id == husbID:
+                        wifedeath = get_all_individual_data_by_key(individuals, wifeID, "DEAT")
+                        if wifedeath == []:
+                            print(ind_id, "Survived by Wife:", wifeID)
+                        for descendantID in descendants:
+                            deadchilddate = get_all_individual_data_by_key(individuals, descendantID, "DEAT")
+                            if deadchilddate == []:
+                                alivedescendant = []
+                                alivedescendant.append(descendantID)
+                                print(ind_id, "Survived by Child:",','.join(alivedescendant))
+                            if wifedeath != [] and deadchilddate != []:
+                                recently_grieving_family = False
+                    elif ind_id == wifeID:
+                        husbdeath = get_all_individual_data_by_key(individuals, husbID, "DEAT")
+                        if husbdeath == []:
+                            print(ind_id, "Survived by Husband:", husbID)
+                        for descendantID in descendants:
+                            deadchilddate = get_all_individual_data_by_key(individuals, descendantID, "DEAT")
+                            if deadchilddate == []:
+                                alivedescendant = []
+                                alivedescendant.append(descendantID)
+                                print(ind_id, "Survived by Child:",','.join(alivedescendant))
+                            if husbdeath != [] and deadchilddate != []:
+                                recently_grieving_family = False
+
+    return recently_grieving_family
 
 def parse_gedcom_file(file_name):
     individuals = {}
@@ -1019,7 +1133,13 @@ def parse_gedcom_file(file_name):
     listOrphans(families, individuals)
     upcomingAnniversaries(families, individuals)
     upcomingBirthdays(individuals)
+=======
+    large_age_difference(families, individuals) #US34
+    recent_deaths(individuals) #US36
+    recent_survivors(families, individuals) #US37
     return individuals, families
+
+
   
 if __name__ == "__main__":
     parse_gedcom_file('sample.ged')
