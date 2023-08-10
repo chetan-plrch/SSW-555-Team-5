@@ -996,7 +996,7 @@ def upcomingBirthdays(individuals):
         if birthday is not None:
             print(birthday)
     return birthday_list
-=======
+
 #US36
 def recent_deaths(individuals):
     is_recently_dead = True
@@ -1133,7 +1133,6 @@ def parse_gedcom_file(file_name):
     listOrphans(families, individuals)
     upcomingAnniversaries(families, individuals)
     upcomingBirthdays(individuals)
-=======
     large_age_difference(families, individuals) #US34
     recent_deaths(individuals) #US36
     recent_survivors(families, individuals) #US37
